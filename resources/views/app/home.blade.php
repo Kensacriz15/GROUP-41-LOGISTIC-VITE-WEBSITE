@@ -1,16 +1,16 @@
 @extends('layouts/layoutMaster')
 
-@section('title', 'Home')
+@section('title', 'Unified Procurement Management')
 
 @section('content')
 <div class="container">
     <div class="card mb-3">
         <div class="card-body">
             <div class="row">
-            <h2>Recent Procurement Requests (Approved)</h2>
+            <h4 style="text-align: center;">Recent Procurement Requests</h4>
                 @foreach($requests as $request)
-                <div class="col-md-4 mb-4">
-                    <div class="card">
+                <div class="col-sm-4 mb-4">
+                    <div class="card bg-light border-success">
                         <div class="card-body">
                             <h5 class="card-title">Request ID: {{ $request->external_request_id }}</h5>
                             <p class="card-text">Status: {{ $request->status }}</p>
@@ -22,7 +22,7 @@
                 @endforeach
             </div>
         </div>
-        <a href="{{ route('app.procurement.listrequest', $request) }}" class="btn btn-lg btn-info">Show More</a>
+        <a href="{{ route('app.procurement.listrequest', $request) }}" class="btn btn-sm btn-warning">Show More</a>
     </div>
 </div>
 @endsection

@@ -25,4 +25,5 @@ class ProcurementRequest extends Model
     {
         return $this->belongsTo(Department::class);
     }
+
 }

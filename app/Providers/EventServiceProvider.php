@@ -17,8 +17,11 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+            App\Events\NewBidPlaced::class =>
+              App\Listeners\BidUpdateListener::class,
         ],
     ];
+
 
     /**
      * Register any events for your application.
@@ -35,4 +38,6 @@ class EventServiceProvider extends ServiceProvider
     {
         return false;
     }
+
+
 }

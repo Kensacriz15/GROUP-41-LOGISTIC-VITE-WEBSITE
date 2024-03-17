@@ -10,6 +10,7 @@ use App\Http\Controllers\authentications\RegisterBasic;
 
 //Controller for PPI
 use App\Http\Controllers\ProcurementRequestsController;
+use App\Http\Controllers\BidController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,3 +42,6 @@ Route::get('/auth/register-basic', [RegisterBasic::class, 'index'])->name('auth-
 Route::get('/procurement-requests', [ProcurementRequestsController::class, 'index'])->name('app.procurement.listrequest');
 Route::get('/procurement-requests/{request}', [ProcurementRequestsController::class, 'show'])->name('app.procurement.listrequestshow');
 Route::get('/generate-pdf/{id}', [ProcurementRequestsController::class, 'generatePDF'])->name('app.procurement.pdf');
+Route::post('/procurement-requests/{requestId}/submit-bid', [BidController::class, 'store'])
+    ->name('app.procurement.open_requests');
+Route::get('/get-new-bids/{requestId}', [ProcurementRequestsController::class, 'getNewBids']);

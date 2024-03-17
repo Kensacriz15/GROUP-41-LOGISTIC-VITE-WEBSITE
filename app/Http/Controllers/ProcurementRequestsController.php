@@ -33,6 +33,23 @@ class ProcurementRequestsController extends Controller
         return view('app.procurement.listrequestshow', compact('request'));
     }
 
+    public function openRequestsForSupplierVendor(Request $request)
+{
+    // Assuming the supplier/vendor ID is available in the session or from authentication
+    $supplierVendorId = $request->session()->get('supplier_vendor_id'); // Adjust as needed
+
+    $openRequests = ProcurementRequest::query()
+        ->where('is_open_for_bids', true)
+        ->where('deadline', '>', now())
+        ->with(['bids' => function ($query) use ($supplierVendorId) {
+            $query->bySupplierOrVendor($supplierVendorId, $supplierVendorId); // Using your helpful scope
+        }])
+        ->orderBy('deadline')
+        ->paginate();
+
+    return view('app.procurement.open_requests', ['requests' => $openRequests]);
+    // Replace 'app.procurement.open_requests' with the actual view path
+}
     public function generatePDF($id)
     {
         $request = ProcurementRequest::with('department','user')->find($id);
@@ -49,4 +66,17 @@ class ProcurementRequestsController extends Controller
             'Content-Disposition' => 'inline; filename="app.procurement.pdf"'
         ]);
     }
+    public function getNewBids(Request $request, $requestId)
+{
+    $supplierVendorId = $request->session()->get('supplier_vendor_id');
+    // ... Adjust to include $requestId in your query ...
+
+    $newBids = Bid::where('supplier_id', $supplierVendorId)
+                   // OR  ->where('vendor_id', $supplierVendorId)
+                  ->where('procurement_request_id', $requestId) // Fetch for specific request
+                  ->where('created_at', '>', $recentBidCutoff)
+                  ->get();
+
+    return response()->json($newBids);
+}
 }
