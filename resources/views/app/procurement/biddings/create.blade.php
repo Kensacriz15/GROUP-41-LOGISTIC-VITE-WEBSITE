@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts/layoutMaster')
 
 @section('content')
 <div class="container">
@@ -8,7 +8,7 @@
                 <div class="card-header">{{ __('Create Bidding Product') }}</div>
 
                 <div class="card-body">
-                    <form method="POST" action="{{ route('products.store') }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route('app.procurement.biddings.store') }}" enctype="multipart/form-data">
                         @csrf
 
                         <div class="form-group row">
@@ -70,8 +70,19 @@
             </span>
         @enderror
     </div>
-</div>
+</div>`
+<div>
+    <label for="external_request_id">Procurement Request:</label>
 
+    <select name="external_request_id">
+        <option value="">--Select Procurement Request--</option>
+        @foreach($procurementRequests as $request)
+            <option value="{{ $request->id }}">
+                {{ $request->external_request_id }}
+            </option>
+        @endforeach
+    </select>
+</div>
                         <div class="form-group row">
                             <label for="image" class="col-md-4 col-form-label text-md-right">{{ __('Image') }}</label>
                             <div class="col-md-6">

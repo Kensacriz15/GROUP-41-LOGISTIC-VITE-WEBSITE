@@ -10,7 +10,7 @@ use App\Http\Controllers\authentications\RegisterBasic;
 
 //Controller for PPI
 use App\Http\Controllers\ProcurementRequestsController;
-use App\Http\Controllers\ProductBiddingController;
+use App\Http\Controllers\BiddingProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,5 +45,12 @@ Route::get('/generate-pdf/{id}', [ProcurementRequestsController::class, 'generat
 Route::post('/procurement-requests/{requestId}/submit-bid', [BidController::class, 'store'])
     ->name('app.procurement.open_requests');
 Route::get('/get-new-bids/{requestId}', [ProcurementRequestsController::class, 'getNewBids']);
-Route::post('/procurement/biddings', [ProductBiddingController::class, 'store'])->name('app.procurement.biddings.store');
-Route::get('/procurement/biddings/create', [ProductBiddingController::class, 'create'])->name('app.procurement.biddings.create');
+
+Route::resource('/procurement/biddings', BiddingProductController::class);
+Route::get('/procurement/biddings', [BiddingProductController::class, 'index'])->name('app.procurement.biddings.index ');
+Route::post('/procurement/biddings', [BiddingProductController::class, 'store'])->name('app.procurement.biddings.store');
+Route::get('/procurement/biddings/create', [BiddingProductController::class, 'create'])->name('app.procurement.biddings.create');
+Route::get('/procurement/biddings/{bidding}', [BiddingProductController::class, 'show'])->name('app.procurement.biddings.show');
+Route::get('/procurement/biddings/{bidding}}/edit', [BiddingProductController::class, 'edit'])->name('app.procurement.biddings.edit');
+Route::put('/procurement/biddings/{bidding}', [BiddingProductController::class, 'update'])->name('app.procurement.biddings.update');
+Route::delete('/procurement/biddings/{bidding}', [BiddingProductController::class, 'destroy'])->name('app.procurement.biddings.destroy');
