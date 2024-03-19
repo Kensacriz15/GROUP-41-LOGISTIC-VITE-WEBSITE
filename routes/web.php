@@ -47,10 +47,11 @@ Route::post('/procurement-requests/{requestId}/submit-bid', [BidController::clas
 Route::get('/get-new-bids/{requestId}', [ProcurementRequestsController::class, 'getNewBids']);
 
 Route::resource('/procurement/biddings', BiddingProductController::class);
-Route::get('/procurement/biddings', [BiddingProductController::class, 'index'])->name('app.procurement.biddings.index ');
+Route::get('/procurement/biddings', [BiddingProductController::class, 'index'])->name('app.procurement.biddings.index');
 Route::post('/procurement/biddings', [BiddingProductController::class, 'store'])->name('app.procurement.biddings.store');
 Route::get('/procurement/biddings/create', [BiddingProductController::class, 'create'])->name('app.procurement.biddings.create');
 Route::get('/procurement/biddings/{bidding}', [BiddingProductController::class, 'show'])->name('app.procurement.biddings.show');
 Route::get('/procurement/biddings/{bidding}}/edit', [BiddingProductController::class, 'edit'])->name('app.procurement.biddings.edit');
 Route::put('/procurement/biddings/{bidding}', [BiddingProductController::class, 'update'])->name('app.procurement.biddings.update');
 Route::delete('/procurement/biddings/{bidding}', [BiddingProductController::class, 'destroy'])->name('app.procurement.biddings.destroy');
+Route::post('/procurement/biddings/{bidding}/bids', [BiddingProductController::class, 'storeBid'])->name('app.procurement.biddings.bids.store');

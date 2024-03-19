@@ -29,7 +29,7 @@ class ProcurementRequestSeeder extends Seeder
                 'department_id' => $faker->randomElement($departments),
                 'request_origin' => $faker->randomElement($origins),
                 'status' => $faker->randomElement($statuses),
-                'external_request_id' => $faker->ean8(), // Or other unique ID
+                'external_request_id' => $faker->randomNumber(8), // Or other unique ID
                 'request_data' => $this->generateRequestData($faker), // Call the function here
                 'created_at' => now(), // Use current timestamp
                 'updated_at' => now()

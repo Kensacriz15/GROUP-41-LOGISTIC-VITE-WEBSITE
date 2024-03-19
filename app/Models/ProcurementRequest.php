@@ -13,7 +13,7 @@ class ProcurementRequest extends Model
     ];
 
     protected $casts = [
-        'request_data' => 'array' // Automatically handle JSON
+        'request_data' => 'array', // Automatically handle JSON
     ];
 
     public function user()
@@ -25,5 +25,4 @@ class ProcurementRequest extends Model
     {
         return $this->belongsTo(Department::class);
     }
-
 }

@@ -30,4 +30,17 @@ class BiddingProduct extends Model
         'end_date' => 'datetime:Y-m-d'
 
     ];
+
+    public function bids()
+    {
+        return $this->hasMany(Bid::class);
+    }
+    public function biddingProduct()
+    {
+      return $this->hasMany(BiddingProduct::class);
+    }
+    public function lowestBid()
+{
+     return $this->hasOne(Bid::class)->orderBy('amount');
+}
 }
