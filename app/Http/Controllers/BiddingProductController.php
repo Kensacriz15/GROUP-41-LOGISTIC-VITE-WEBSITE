@@ -10,7 +10,7 @@ use App\Models\Vendor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\File;
 
 class BiddingProductController extends Controller
 {
@@ -22,9 +22,9 @@ class BiddingProductController extends Controller
 
     // Add filtering/ordering if needed
      // e.g., $biddings = $biddings->where('open_for_bids', true)->orderBy('start_date', 'desc')->paginate(10);
-
     return view('app.procurement.biddings.index', compact('biddings'));
 }
+
 
   public function create()
     {
@@ -81,9 +81,47 @@ class BiddingProductController extends Controller
 public function edit(BiddingProduct $bidding)
 {
     // Authorization check (if necessary)
-    $this->authorize('update', $bidding);
+    //$this->authorize('update', $bidding);
 
     return view('app.procurement.biddings.edit', compact('bidding'));
+}
+public function update(Request $request, BiddingProduct $bidding)
+{
+    // 1. Validation
+    $validatedData = $request->validate([
+        'name' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'starting_price' => 'required|numeric',
+        'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Image validation
+        'start_date' => 'required|date|before_or_equal:end_date',
+        'end_date' => 'required|date|after_or_equal:start_date',
+        'external_request_id' => 'nullable|string' // Adjust validation if needed
+    ]);
+
+    // 2. Image Handling
+    if ($request->hasFile('image')) {
+        // Delete Old Image (if it exists)
+        if ($bidding->image) {
+            $oldImagePath = public_path('images/' . $bidding->image);
+            if (File::exists($oldImagePath)) {
+                File::delete($oldImagePath);
+            }
+        }
+
+        // Upload New Image
+        $image = $request->file('image');
+        $imageName = time() . '.' . $image->getClientOriginalExtension();
+        $image->move(public_path('images'), $imageName);
+
+        // Update the image name in the validated data
+        $validatedData['image'] = $imageName;
+    }
+
+    // 3. Update the Bidding Product
+    $bidding->update($validatedData);
+
+    // 4. Redirect with Success Message
+    return redirect()->route('app.procurement.biddings.index')->with('success', 'Bidding product updated!');
 }
 
 public function destroy(BiddingProduct $bidding)
@@ -103,8 +141,11 @@ public function show($id)
     $request = ProcurementRequest::with('department', 'user')->where('external_request_id', $id)->first();
 
     // Fetch existing bid (if any)
-    $existingBid = null; // Initialize here
     $existingBid = $bidding->bids()->first();
+
+    // Always fetch suppliers, as they might be needed
+    $suppliers = Supplier::all();
+    $vendors = Vendor::all();
 
     // Adjust data for view
     if ($existingBid) {
@@ -129,34 +170,32 @@ public function storeBid(Request $request, BiddingProduct $bidding)
     // Validation
 
     $request->validate([
-      'amount' => [
-        'required',
-        'numeric',
-        'min:0.01',
-        function ($attribute, $value, $fail) use ($bidding) {
-            $threshold = $bidding->lowestBid ? $bidding->lowestBid->amount : $bidding->starting_price; // Determine the correct threshold
+        'amount' => [
+            'required',
+            'numeric',
+            'min:0.01',
+            function ($attribute, $value, $fail) use ($bidding) {
+                $threshold = $bidding->lowestBid ? $bidding->lowestBid->amount : $bidding->starting_price;
 
-            if ($value >= $threshold) {
-                $fail('Your bid must be lower than the current lowest bid or starting price.'); // You might customize the message
-            }
-        },
-    ]
-  ]);
+                if ($value >= $threshold) {
+                    $fail('Your bid must be lower than the current lowest bid or starting price.');
+                }
+            },
+        ],
+    ]);
 
-    // Create the bid
-    $bid = $bidding->bids()->create([
-      'bidding_product_id' => $bidding->id,
-      'amount' => $request->input('amount'),
-
-      // Dynamic Supplier/Vendor association
-      'supplier_id' => $request->input('bid_type') === 'supplier' ? $request->input('supplier_id') : null,
-      'vendor_id'  => $request->input('bid_type') === 'vendor' ? $request->input('vendor_id') : null,
-  ]);
-
-  BidPlaced::dispatch($bid);
+    // Dynamic Supplier/Vendor association
+    $bid = Bid::updateOrCreate(
+        [
+            'bidding_product_id' => $bidding->id,
+            'supplier_id' => $request->input('bid_type') === 'supplier' ? $request->input('supplier_id') : null,
+            'vendor_id' => $request->input('bid_type') === 'vendor' ? $request->input('vendor_id') : null,
+        ],
+        [
+            'amount' => $request->input('amount'),
+        ]
+    );
 
     return redirect()->back()->with('success', 'Bid placed!');
 }
-
-
 }

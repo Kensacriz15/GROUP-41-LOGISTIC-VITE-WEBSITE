@@ -30,17 +30,15 @@
                             <td>{{ $bidding->start_date->format('M d, Y') }}</td>
                             <td>{{ $bidding->end_date->format('M d, Y') }}</td>
                             <td>
-                                @if($bidding->open_for_bids)
-                                    <span class="badge badge-success">Open</span>
-                                @else
-                                    <span class="badge badge-secondary">Closed</span>
-                                @endif
+                            @if($bidding->isOpen())
+    <span class="badge badge-success">Open</span>
+@else
+    <span class="badge badge-secondary">Closed</span>
+@endif
                             </td>
                             <td>
                                 <a href="{{ route('app.procurement.biddings.show', $bidding->id) }}" class="btn btn-sm btn-info">View</a>
-                                @can('update', $bidding)
                                     <a href="{{ route('app.procurement.biddings.edit', $bidding->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                                @endcan
                                  @can('delete', $bidding)
                                     <form method="POST" action="{{ route('app.procurement.biddings.destroy', $bidding->id) }}" style="display: inline">
                                         @csrf

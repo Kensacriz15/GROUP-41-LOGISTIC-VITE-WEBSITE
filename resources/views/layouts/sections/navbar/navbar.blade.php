@@ -88,7 +88,13 @@ $navbarDetached = ($navbarDetached ?? '');
                         Bestlink
                         @endif
                       </span>
-                      <small class="text-muted">BCP</small>
+                      @if (Auth::check())
+                      <small class="text-muted">
+                      {{ Auth::user()->roles->first()->name ?? 'BCP' }}
+                      </small>
+                      @else
+                      <small class="text-muted">Guest</small>
+                      @endif
                     </div>
                   </div>
                 </a>
@@ -149,7 +155,7 @@ $navbarDetached = ($navbarDetached ?? '');
               @foreach (Auth::user()->allTeams() as $team)
               {{-- Below commented code read by artisan command while installing jetstream. !! Do not remove if you want to use jetstream. --}}
 
-              {{-- <x-switchable-team :team="$team" /> --}}
+              <x-switchable-team :team="$team" />
               @endforeach
               @endif
               @endif

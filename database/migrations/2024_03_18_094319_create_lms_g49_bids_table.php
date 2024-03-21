@@ -37,5 +37,7 @@ return new class extends Migration
         $table->dropForeign(['bidding_product_id']);
         $table->dropForeign(['vendor_id']);
         $table->dropForeign(['supplier_id']);
+        $table->dropUnique('lms_g49_bids_bidding_product_id_supplier_id_unique');
+        $table->dropUnique('lms_g49_bids_bidding_product_id_vendor_id_unique');
     }
 };

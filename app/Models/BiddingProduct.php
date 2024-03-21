@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class BiddingProduct extends Model
 {
@@ -25,11 +26,10 @@ class BiddingProduct extends Model
     ];
 
     protected $casts = [
-        'product_data' => 'array',
-        'start_date' => 'datetime:Y-m-d', // Adjust format if necessary
-        'end_date' => 'datetime:Y-m-d'
-
-    ];
+      'product_data' => 'array',
+      'start_date' => 'date',   // Adjust only if you were casting it differently before
+      'end_date' => 'date'
+  ];
 
     public function bids()
     {
@@ -43,4 +43,11 @@ class BiddingProduct extends Model
 {
      return $this->hasOne(Bid::class)->orderBy('amount');
 }
+public function isOpen()
+{
+    $now = now();
+    $result = $now->gte($this->start_date) && $now->lte($this->end_date);
+    return $result;
+}
+
 }

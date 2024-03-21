@@ -13,7 +13,7 @@ return new class extends Migration
     {
       Schema::create('lms_g41_procurement_requests', function (Blueprint $table) {
         $table->id();
-        $table->foreignId('user_id')->constrained('lms_g41_users');
+        $table->foreignId('user_id')->constrained('users');
         $table->foreignId('department_id')->constrained('lms_g41_departments');
         $table->string('request_origin');
         $table->string('status');

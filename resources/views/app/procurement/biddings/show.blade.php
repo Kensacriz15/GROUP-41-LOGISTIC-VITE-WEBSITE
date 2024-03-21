@@ -16,24 +16,24 @@
                     <dd class="col-sm-8">{{ $bidding->starting_price }}</dd>
 
                     <dt class="col-sm-4">Start Date:</dt>
-                    <dd class="col-sm-8">{{ $bidding->start_date->format('M d, Y') }}</dd>
+<dd class="col-sm-8">{{ $bidding->start_date ? $bidding->start_date->format('M d, Y') : '' }}</dd>
 
-                    <dt class="col-sm-4">End Date:</dt>
-                    <dd class="col-sm-8">{{ $bidding->end_date->format('M d, Y') }}</dd>
+<dt class="col-sm-4">End Date:</dt>
+<dd class="col-sm-8">{{ $bidding->end_date ? $bidding->end_date->format('M d, Y') : '' }}</dd>
+
 
                     <dt class="col-sm-4">External Request ID:</dt>
                     <dd class="col-sm-8">{{ $bidding->external_request_id }}</dd>
 
 
                     <dt class="col-sm-4">Status:</dt>
-                    <dd class="col-sm-8">
-                        @if($bidding->open_for_bids)
-                            <span class="badge badge-success">Open</span>
-                        @else
-                            <span class="badge badge-secondary">Closed</span>
-                        @endif
-                    </dd>
-                </dl>
+                      <dd class="col-sm-8">
+                      @if($bidding->isOpen())
+    <span class="badge badge-success">Open</span>
+@else
+    <span class="badge badge-secondary">Closed</span>
+@endif
+                      </dd>
 
                 @if ($bidding->bids()->count() && $bidding->lowestBid)
      <h3>Current Lowest Bid: {{ $bidding->lowestBid->amount }} </h3>
@@ -97,6 +97,16 @@
 document.getElementById('bid_type').addEventListener('change', function() {
   document.getElementById('supplier-select').style.display = (this.value === 'supplier') ? 'block' : 'none';
   document.getElementById('vendor-select').style.display = (this.value === 'vendor') ? 'block' : 'none';
+});
+
+$('form').submit(function(event) {
+  if ($('#bid_type').val() === 'supplier' && !$('#supplier_id').val()) {
+    alert('Please select a supplier.');
+    event.preventDefault();
+  } else if ($('#bid_type').val() === 'vendor' && !$('#vendor_id').val()) {
+    alert('Please select a vendor.');
+    event.preventDefault();
+  }
 });
 </script>
 @endsection
