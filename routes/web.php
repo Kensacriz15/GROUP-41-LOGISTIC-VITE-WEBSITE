@@ -13,6 +13,7 @@ use App\Http\Controllers\UserController;
 //Controller for PPI
 use App\Http\Controllers\ProcurementRequestsController;
 use App\Http\Controllers\BiddingProductController;
+use App\Http\Controllers\BidController;
 
 /*
 |--------------------------------------------------------------------------
@@ -62,6 +63,9 @@ Route::put('/procurement/biddings/{bidding}', [BiddingProductController::class, 
 Route::delete('/procurement/biddings/{bidding}', [BiddingProductController::class, 'destroy'])->name('app.procurement.biddings.destroy');
 Route::post('/procurement/biddings/{bidding}/bids', [BiddingProductController::class, 'storeBid'])->name('app.procurement.biddings.bids.store');
 Route::put('/bids/{bid}', [YourBidController::class, 'updateBid'])->name('bids.update');
+Route::get('/procurement-indexbids', [BidController::class, 'index'])->name('app.procurement.indexbids');
+Route::get('/procurement-listbids/{productId}', [BidController::class, 'show'])->name('app.procurement.listbids');
+
 
 Route::middleware([
     'auth:sanctum',

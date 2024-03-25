@@ -39,6 +39,7 @@
                             <td>
                                 <a href="{{ route('app.procurement.biddings.show', $bidding->id) }}" class="btn btn-sm btn-info">View</a>
                                     <a href="{{ route('app.procurement.biddings.edit', $bidding->id) }}" class="btn btn-sm btn-warning">Edit</a>
+
                                  @can('delete', $bidding)
                                     <form method="POST" action="{{ route('app.procurement.biddings.destroy', $bidding->id) }}" style="display: inline">
                                         @csrf

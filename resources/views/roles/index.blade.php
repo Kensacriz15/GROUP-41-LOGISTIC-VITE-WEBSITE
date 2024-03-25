@@ -69,7 +69,7 @@
         </ul>
     </nav>
 </div>
-
+@endif
 
                 <a href="{{ route('roles.create') }}" class="btn btn-success btn-sm my-2"><i class="bi bi-plus-circle"></i> Add New Role</a>
 

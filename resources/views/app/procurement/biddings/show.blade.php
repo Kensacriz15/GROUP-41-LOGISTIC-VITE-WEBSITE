@@ -12,7 +12,7 @@
                     <dt class="col-sm-4">Description:</dt>
                     <dd class="col-sm-8">{{ $bidding->description }}</dd>
 
-                    <dt class="col-sm-4">Starting Price:</dt>
+                    <dt class="col-sm-4">Starting Price:₱</dt>
                     <dd class="col-sm-8">{{ $bidding->starting_price }}</dd>
 
                     <dt class="col-sm-4">Start Date:</dt>
@@ -36,7 +36,7 @@
                       </dd>
 
                 @if ($bidding->bids()->count() && $bidding->lowestBid)
-     <h3>Current Lowest Bid: {{ $bidding->lowestBid->amount }} </h3>
+     <h3>Current Lowest Bid: ₱{{ $bidding->lowestBid->amount }} </h3>
 @endif
                 <div class="form-group">
                 <form method="POST" action="{{ route('app.procurement.biddings.bids.store', $bidding->id) }}">

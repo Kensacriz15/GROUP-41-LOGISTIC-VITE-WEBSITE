@@ -31,10 +31,10 @@ class BiddingProduct extends Model
       'end_date' => 'date'
   ];
 
-    public function bids()
-    {
-        return $this->hasMany(Bid::class);
-    }
+  public function bids()
+  {
+      return $this->hasMany(Bid::class);
+  }
     public function biddingProduct()
     {
       return $this->hasMany(BiddingProduct::class);

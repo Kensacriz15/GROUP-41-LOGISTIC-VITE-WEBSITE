@@ -38,7 +38,13 @@
                     <div class="card bg-light border-success">
                         <div class="card-body">
                         <h5 class="card-title">Bidding Name: {{ $bidding->name }}</h5>
-                            <p class="card-text">Status: {{ $bidding->open_for_bids ? 'Open' : 'Closed' }}</p>
+                        <p
+                            @if($bidding->isOpen())
+    <span class="badge badge-success">Open</span>
+@else
+    <span class="badge badge-secondary">Closed</span>
+@endif
+                        </p>
                             <p class="card-text">Starting Price: {{ $bidding->starting_price }}</p>
                             <a href="{{ route('app.procurement.biddings.show', $bidding->id) }}" class="btn btn-sm btn-primary">View Details</a>
                         </div>

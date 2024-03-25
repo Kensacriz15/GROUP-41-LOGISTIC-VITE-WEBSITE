@@ -17,14 +17,7 @@ class UserController extends Controller
   /**
    * Instantiate a new UserController instance.
    */
-  public function __construct()
-  {
-    $this->middleware('auth');
-    $this->middleware('permission:create-user|edit-user|delete-user', ['only' => ['index', 'show']]);
-    $this->middleware('permission:create-user', ['only' => ['create', 'store']]);
-    $this->middleware('permission:edit-user', ['only' => ['edit', 'update']]);
-    $this->middleware('permission:delete-user', ['only' => ['destroy']]);
-  }
+
 
   /**
    * Display a listing of the resource.
