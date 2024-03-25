@@ -14,10 +14,10 @@ class DepartmentSeeder extends Seeder
         ['name' => 'Restaurant Department'],
         ['name' => 'HR Department'],
         ['name' => 'Marketing Department'],
-        ['name' => 'Finance Department'],
-        ['name' => 'Sales Department'],
+        ['name' => 'Accounting and Finance Department'],
+        ['name' => 'Sales and Marketing Department'],
         ['name' => 'Operations Department'],
-        ['name' => 'Outside Department'],
+        ['name' => 'E-Commerse Department'],
     ]);
     }
 }

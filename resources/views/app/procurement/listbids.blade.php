@@ -30,6 +30,9 @@
                                 {{ $bid->vendor->vendor_name }}
                             @endif
                         </td>
+                        <td>
+            <button type="button" onclick="createInvoice({{ $bid->id }})">Create Invoice</button>
+        </td>
                     </tr>
                 @endforeach
             </tbody>
@@ -38,6 +41,28 @@
         <p>No bids have been placed for this product yet.</p>
     @endif
 
+    @if ($biddingProduct->winners->count() > 0)
+        <h2>Winners</h2>
+        @foreach ($biddingProduct->winners as $winner)
+            <div class="winner-card">
+                <p><strong>Product:</strong> {{ $biddingProduct->name }}</p>
+                <p><strong>Winning Bidder:</strong>
+                @if ($winner->bid->supplier)
+                    {{ $winner->bid->supplier->supplier_name}} (Supplier)
+                @else
+                    {{ $winner->bid->vendor->vendor_name}} (Vendor)
+                @endif
+                </p>
+                <p><strong>Amount:</strong> {{ $winner->bid->amount }}</p>
+                <button type="button" onclick="window.location.href='{{ route('createInvoice', ['bidId' => $bid->id]) }}'">Create Invoice</button>
+            </div>
+        @endforeach
+    @endif
+
+    <script>
+        function showWinners() { /* ... your existing sorting code ... */ }
+        function createInvoice(winnerId) { /* ...  Your invoice creation logic ... */ }
+    </script>
     <script>
         function showWinners() {
             const bidRows = document.querySelectorAll('.bids-table tbody tr');

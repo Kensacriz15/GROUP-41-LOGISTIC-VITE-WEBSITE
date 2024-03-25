@@ -49,5 +49,25 @@ public function isOpen()
     $result = $now->gte($this->start_date) && $now->lte($this->end_date);
     return $result;
 }
+public function winners()
+{
+    return $this->hasMany(Winner::class);
+}
+public function determineWinners()
+{
+    // Find closed bidding products
+    $biddingProducts = BiddingProduct::where('end_date', '<=', now())->get();
 
+    foreach ($biddingProducts as $product) {
+        // Assuming you want the lowest bid
+        $winningBid = $product->bids()->orderBy('amount')->first();
+
+        if ($winningBid) {
+            Winner::create([
+                'bidding_product_id' => $product->id,
+                'bid_id' => $winningBid->id,
+            ]);
+        }
+    }
+}
 }

@@ -8,8 +8,6 @@ use App\Models\User;
 use App\Models\Department;
 use Illuminate\Support\Facades\DB;
 use Faker\Factory as Faker;
-use Faker\Provider\LoremIpsum;
-
 
 class ProcurementRequestSeeder extends Seeder
 {
@@ -18,7 +16,6 @@ class ProcurementRequestSeeder extends Seeder
         $faker = Faker::create();
         $statuses = ['pending', 'approved', 'rejected', 'in_progress'];
         $origins = ['internal', 'external_eis'];
-        $departmentNames = Department::whereNotIn('id', [1, 2, 3, 4, 5, 6, 7, 8])->pluck('name');
 
         $departments = Department::pluck('id')->toArray();
         $users = User::pluck('id')->toArray();
@@ -29,9 +26,9 @@ class ProcurementRequestSeeder extends Seeder
                 'department_id' => $faker->randomElement($departments),
                 'request_origin' => $faker->randomElement($origins),
                 'status' => $faker->randomElement($statuses),
-                'external_request_id' => $faker->randomNumber(8), // Or other unique ID
-                'request_data' => $this->generateRequestData($faker), // Call the function here
-                'created_at' => now(), // Use current timestamp
+                'external_request_id' => $faker->randomNumber(8),
+                'request_data' => $this->generateRequestData($faker),
+                'created_at' => now(),
                 'updated_at' => now()
             ]);
         }
@@ -39,49 +36,61 @@ class ProcurementRequestSeeder extends Seeder
 
     private function generateRequestData($faker)
     {
-      $products = [
-        'Forklifts' => ['Toyota Electric Forklift', 'Hyster Diesel Forklift', 'Crown Reach Truck'],
-        'Pallet Jacks' => ['Crown Pallet Jack', 'Yale Electric Pallet Jack', 'Jungheinrich Walkie Pallet Truck'],
-        'Shipping Containers' => ['20ft Shipping Container', '40ft Shipping Container', 'Refrigerated Shipping Container'],
-        'Packaging Materials' => ['Cardboard Boxes', 'Bubble Wrap', 'Stretch Film', 'Packing Tape'],
-        'Warehouse Racking' => ['Selective Pallet Racking', 'Drive-in Racking', 'Cantilever Racking'],
-        'Office Supplies' => ['Stapler', 'Binder Clips', 'Pens (Pack of 10)', 'Notepads'],
-    ];
+        $products = [
+            'Office Supplies' => ['Ballpoint Pens', 'A4 Bond Paper', 'Staplers', 'Manila Folders'],
+            'Electronics' => ['Laptops', 'Printers', 'Smartphones', 'Tablets'],
+            'Furniture' => ['Office Chairs', 'Desks', 'File Cabinets', 'Bookshelves'],
+            'Appliances' => ['Refrigerators', 'Air Conditioners', 'Washing Machines', 'Microwaves'],
+            'Food and Beverages' => ['Coffee', 'Snacks', 'Bottled Water', 'Soft Drinks'],
+            'Cleaning Supplies' => ['Cleaning Solution', 'Brooms', 'Mops', 'Trash Bags'],
+            'Safety Equipment' => ['First Aid Kits', 'Safety Helmets', 'Safety Shoes', 'Safety Gloves'],
+        ];
 
         $quantities = [1, 2, 3, 5, 10, 20];
-
         $items = [];
+
         for ($i = 0; $i < rand(1, 3); $i++) {
             $category = $faker->randomElement(array_keys($products));
             $product = $faker->randomElement($products[$category]);
 
             $items[] = [
                 'product_name' => $product,
-                'description' => $faker->sentence(), // Placeholder description
+                'description' => $faker->sentence(),
                 'quantity' => $faker->randomElement($quantities)
             ];
         }
 
-        $justificationTemplates = [
-          "This request is for essential %s to optimize our logistics operations.",
-          "We need %s to meet the increasing demand for our Department.",
-          "Upgrading our %s will enhance the efficiency of handling raw materials and optimize production processes.",
-          "Investing in %s will enable us to expand our product range and cater to a wider customer base.",
-          "Upgrading our %s will enhance our efficiency in handling logistics operations."
+        // Filipino Data Generation
+        $firstNames = ['Juan', 'Maria', 'Jose', 'Ana', 'Pedro'];
+        $lastNames = ['Dela Cruz', 'Santos', 'Reyes'];
+        $cities = ['Manila', 'Quezon City', 'Caloocan'];
+        $streets = ['Roxas Boulevard', 'EDSA', 'España Boulevard'];
+
+        $requesterInfo = [
+            'name' => $faker->randomElement($firstNames) . ' ' . $faker->randomElement($lastNames),
+            'contact' => [
+                'address' => $faker->numberBetween(100, 999) . ' ' . $faker->randomElement($streets) . ', ' . $faker->randomElement($cities),
+                'phone' => '+63 9' . $faker->randomNumber(9)
+            ]
         ];
+
+        $justificationTemplates = [
+            "This request is for essential %s to optimize our logistics operations.",
+            "We need %s to meet the increasing demand for our Department.",
+            "Upgrading our %s will enhance the efficiency of handling raw materials and optimize production processes.",
+            "Investing in %s will enable us to expand our product range and cater to a wider customer base.",
+            "Upgrading our %s will enhance our efficiency in handling logistics operations."
+        ];
+
         $justification = sprintf(
             $faker->randomElement($justificationTemplates),
-            $faker->randomElement(array_keys($products)), // Random category or product
-            $faker->company() // Placeholder project name
+            $faker->randomElement(array_keys($products))
         );
 
         return json_encode([
             'items' => $items,
-            'requester_info' => [
-                'name' => $faker->name,
-                'contact' => $faker->email
-            ],
+            'requester_info' => $requesterInfo,
             'justification' => $justification
         ]);
     }
-}
+  }

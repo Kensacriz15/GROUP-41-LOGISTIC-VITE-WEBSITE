@@ -40,7 +40,10 @@
 
             <h5>Requester Information</h5>
             <p><strong>Name:</strong> {{ $request->request_data['requester_info']['name'] ?? 'Not Available' }}</p>
-            <p><strong>Contact:</strong> {{ $request->request_data['requester_info']['contact'] ?? 'Not Available' }}</p>
+            <p>
+            <strong>Contact:</strong><br>
+Address: {{ $request->request_data['requester_info']['contact']['address'] ?? 'Not Available' }}<br>
+Phone: {{ $request->request_data['requester_info']['contact']['phone'] ?? 'Not Available' }}
 
             <h5>Request Items</h5>
             <ul>

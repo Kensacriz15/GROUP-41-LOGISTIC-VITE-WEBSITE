@@ -14,7 +14,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProcurementRequestsController;
 use App\Http\Controllers\BiddingProductController;
 use App\Http\Controllers\BidController;
-
+use App\Models\BiddingProduct;
+use App\Models\InvoiceController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -65,7 +66,20 @@ Route::post('/procurement/biddings/{bidding}/bids', [BiddingProductController::c
 Route::put('/bids/{bid}', [YourBidController::class, 'updateBid'])->name('bids.update');
 Route::get('/procurement-indexbids', [BidController::class, 'index'])->name('app.procurement.indexbids');
 Route::get('/procurement-listbids/{productId}', [BidController::class, 'show'])->name('app.procurement.listbids');
+Route::get('/invoice/view/{invoiceId}', [BidController::class, 'viewInvoice'])->name('viewInvoice');
+Route::get('/invoice/create/{bidId}', [BidController::class, 'createInvoice'])->name('createInvoice');
+Route::put('/invoice/update/{invoiceId}', [BidController::class, 'updateInvoice'])->name('updateInvoice');
+Route::get('app/procurement/invoices/invoice-template/{invoiceId}', [BidController::class, 'viewInvoice'])->name('app.procurement.invoices.invoice-template');
+Route::get('/invoices/create/{bidId}', [BidController::class, 'createInvoice'])->name('createInvoice');
 
+Route::get('/invoices', [BidController::class, 'indexInvoices'])
+     ->name('app.procurement.invoices.index');
+
+Route::get('/bids/{bid}/invoice/edit', [BidController::class, 'editInvoice'])
+     ->name('app.procurement.invoices.edit');
+
+Route::put('/bids/{bid}/invoice/update', [BidController::class, 'updateInvoice'])
+     ->name('app.procurement.invoices.update');
 
 Route::middleware([
     'auth:sanctum',
@@ -75,4 +89,18 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+});
+Route::get('/test-winners', function () {
+  $biddingProduct = BiddingProduct::first(); // Or find a specific product by id
+
+  if ($biddingProduct) { // Check if product exists
+      if ($biddingProduct->winners()->exists()) {
+          return "Winners already determined for this bidding product.";
+      }
+
+      $biddingProduct->determineWinners();
+      return "determineWinners function executed.";
+  } else {
+      return "No bidding product found.";
+  }
 });
