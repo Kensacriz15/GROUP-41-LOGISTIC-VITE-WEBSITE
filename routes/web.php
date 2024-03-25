@@ -91,16 +91,18 @@ Route::middleware([
     })->name('dashboard');
 });
 Route::get('/test-winners', function () {
-  $biddingProduct = BiddingProduct::first(); // Or find a specific product by id
+  $biddingProducts = BiddingProduct::whereDoesntHave('winners')->get(); // Get the bidding products without winners
 
-  if ($biddingProduct) { // Check if product exists
-      if ($biddingProduct->winners()->exists()) {
-          return "Winners already determined for this bidding product.";
-      }
-
-      $biddingProduct->determineWinners();
-      return "determineWinners function executed.";
-  } else {
-      return "No bidding product found.";
+  if ($biddingProducts->isEmpty()) {
+      return "Winners already determined for all bidding products.";
   }
+
+  $productsProcessed = 0;
+
+  foreach ($biddingProducts as $biddingProduct) {
+      $biddingProduct->determineWinners();
+      $productsProcessed++;
+  }
+
+  return "determineWinners function executed for $productsProcessed bidding products.";
 });
