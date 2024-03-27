@@ -14,6 +14,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProcurementRequestsController;
 use App\Http\Controllers\BiddingProductController;
 use App\Http\Controllers\BidController;
+use App\Http\Controllers\ApiController;
 use App\Models\BiddingProduct;
 use App\Models\InvoiceController;
 /*
@@ -45,7 +46,7 @@ Route::resources([
   'users' => UserController::class,
 ]);
 
-
+Route::get('/procurement', [ApiController::class, 'Procurement']);
 // procurement
 Route::get('/procurement-requests', [ProcurementRequestsController::class, 'index'])->name('app.procurement.listrequest');
 Route::get('/procurement-requests/{request}', [ProcurementRequestsController::class, 'show'])->name('app.procurement.listrequestshow');
