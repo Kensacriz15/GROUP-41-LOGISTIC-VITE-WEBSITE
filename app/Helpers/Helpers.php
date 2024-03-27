@@ -196,4 +196,15 @@ class Helpers
       }
     }
   }
+  function calculate_progress($start_date, $end_date) {
+    $totalDuration = $end_date->diffInTimestamp($start_date);
+    $elapsed = now()->diffInSeconds($start_date);
+
+    if ($totalDuration === 0) {
+        return 100;
+    }
+
+    $progressPercentage = min(100, ($elapsed / $totalDuration) * 100);
+    return $progressPercentage;
+}
 }

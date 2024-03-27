@@ -53,26 +53,32 @@ class BidController extends Controller
         return view('app.procurement.listbids', compact('biddingProduct'));
     }
     public function determineWinners()
-{
-    $this->where('end_date', '<=', now())->each(function ($product) {
-        if ($product->winners()->count() > 0) {
-            return; // Skip to the next product
-        }
-
-        $winningBid = $product->bids()->orderBy('amount')->first();
-
-        if ($winningBid) {
-            try {
-                Winner::create([
-                    'bidding_product_id' => $product->id,
-                    'bid_id' => $winningBid->id,
-                ]);
-            } catch (\Exception $e) {
-                // Handle the exception if necessary
+    {
+        $this->where('end_date', '<=', now())->each(function ($product) {
+            if ($product->winners()->count() > 0) {
+                return; // Skip to the next product if winners already exist
             }
-        }
-    });
-}
+
+            // Find the winning bid(s) for the CURRENT bidding product
+            $winningBidQuery = $product->bids()->orderBy('amount'); // Scoped to the product's bids
+
+            // Handle potential ties (optional - adjust if needed)
+            $winningBids = $winningBidQuery->get(); // Get all bids with the lowest amount
+
+            foreach ($winningBids as $winningBid) {
+                try {
+                    Winner::create([
+                        'bidding_product_id' => $product->id,
+                        'bid_id' => $winningBid->id,
+                    ]);
+                } catch (\Exception $e) {
+                    // Handle the exception appropriately:
+                    Log::error('Winner creation failed:', ['product_id' => $product->id, 'exception' => $e]);
+                }
+            }
+        });
+    }
+
 
     public function viewInvoice($invoiceId)
     {
