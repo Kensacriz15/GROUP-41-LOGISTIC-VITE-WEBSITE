@@ -38,7 +38,7 @@
   <div class="col-lg-6 mb-4">
     <div class="swiper-container swiper-container-horizontal swiper swiper-card-advance-bg" id="swiper-with-pagination-cards">
       <div class="swiper-wrapper">
-        <div class="swiper-slide" style="background-color: #ba0048;">
+        <div class="swiper-slide" >
           <div class="row">
             <div class="col-12">
               <h5 class="text-white mb-0 mt-2">Procurement</h5>
@@ -79,47 +79,47 @@
             </div>
           </div>
         </div>
-        <div class="swiper-slide" style="background-color: #008000;">
-          <div class="row">
-            <div class="col-12">
-              <h5 class="text-white mb-0 mt-2">Purchase</h5>
-              <small>Total 28.5% Conversion Rate</small>
-            </div>
-            <div class="col-lg-7 col-md-9 col-12 order-2 order-md-1">
-              <h6 class="text-white mt-0 mt-md-3 mb-3">Spending</h6>
-              <div class="row">
-                <div class="col-6">
-                  <ul class="list-unstyled mb-0">
-                    <li class="d-flex mb-4 align-items-center">
-                      <p class="mb-0 fw-medium me-2 website-analytics-text-bg">12h</p>
-                      <p class="mb-0">Spend</p>
-                    </li>
-                    <li class="d-flex align-items-center mb-2">
-                      <p class="mb-0 fw-medium me-2 website-analytics-text-bg">127</p>
-                      <p class="mb-0">Order</p>
-                    </li>
-                  </ul>
-                </div>
-                <div class="col-6">
-                  <ul class="list-unstyled mb-0">
-                    <li class="d-flex mb-4 align-items-center">
-                      <p class="mb-0 fw-medium me-2 website-analytics-text-bg">18</p>
-                      <p class="mb-0">Order Size</p>
-                    </li>
-                    <li class="d-flex align-items-center mb-2">
-                      <p class="mb-0 fw-medium me-2 website-analytics-text-bg">2.3k</p>
-                      <p class="mb-0">Items</p>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            <div class="col-lg-5 col-md-3 col-12 order-1 order-md-2 my-4 my-md-0 text-center">
-            <i class="fa-solid fa-peso-sign" style="font-size: 170px;" alt="Website Analytics" width="170" class="card-website-analytics-img"></i>
-            </div>
-          </div>
+        <div class="swiper-slide">
+  <div class="row">
+    <div class="col-12">
+      <h5 class="text-white mb-0 mt-2">Purchase</h5>
+      <small>Total {{ $currentBudget }} Budget </small>
+    </div>
+    <div class="col-lg-7 col-md-9 col-12 order-2 order-md-1">
+      <h6 class="text-white mt-0 mt-md-3 mb-3">Spending</h6>
+      <div class="row">
+        <div class="col-6">
+          <ul class="list-unstyled mb-0">
+            <li class="d-flex mb-4 align-items-center">
+              <p class="mb-0 fw-medium me-2 website-analytics-text-bg">{{  $budgetUse }}</p>
+              <p class="mb-0">Spend</p>
+            </li>
+            <li class="d-flex align-items-center mb-2">
+              <p class="mb-0 fw-medium me-2 website-analytics-text-bg">{{ $numberOfInvoices }}</p>
+              <p class="mb-0">Invoices</p>
+            </li>
+          </ul>
         </div>
-        <div class="swiper-slide" style="background-color: #240771;">
+        <div class="col-6">
+          <ul class="list-unstyled mb-0">
+            <li class="d-flex mb-4 align-items-center">
+              <p class="mb-0 fw-medium me-2 website-analytics-text-bg">{{ $currentBudget - ($invoice->amount_paid ?? 0) }}</p>
+              <p class="mb-0">Invoice Balance</p>
+            </li>
+            <li class="d-flex align-items-center mb-2">
+              <p class="mb-0 fw-medium me-2 website-analytics-text-bg">//</p>
+              <p class="mb-0">Completed Transactions</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5 col-md-3 col-12 order-1 order-md-2 my-4 my-md-0 text-center">
+      <i class="fa-solid fa-peso-sign" style="font-size: 170px;" alt="Website Analytics" width="170" class="card-website-analytics-img"></i>
+    </div>
+  </div>
+</div>
+        <div class="swiper-slide" >
           <div class="row">
             <div class="col-12">
               <h5 class="text-white mb-0 mt-2">Inventory</h5>
@@ -165,79 +165,96 @@
   </div>
   <!--/ Website Analytics -->
 
-<!-- Sales Overview -->
-@php
+  <!-- Bidding Overview -->
+  @php
 $currentDate = now();
+$activeBiddings = 0;
 @endphp
-@foreach($biddings as $bidding)
-@if($bidding->end_date > $currentDate)
-  <div class="col-lg-3 col-sm-6 mb-4">
-    <div class="card">
-      <div class="card-header">
-        <div class="d-flex justify-content-between">
-          <small class="d-block mb-1 text-muted">Current Bidding</small>
-          <p class="card-text text-success">Bids: {{ $bidding->bids->count() }}</p>
-        </div>
-        <h4 class="card-title mb-1">{{$bidding->name }}</h4>
-      </div>
-      <div class="card-body">
-        <div class="row">
-          <div class="col-4">
-            <div class="d-flex gap-2 align-items-center mb-2">
-            <span class="badge bg-success p-1 rounded"><i class="fas fa-money-bill ti-xs"></i></span>
-              <p class="mb-0">Lowest Bid: </p>
-            </div>
-            @if ($bidding->bids()->count() && $bidding->lowestBid)
-             <h5 class="mb-0 pt-1 text-nowrap">₱ {{$bidding->lowestBid->amount}}</h5>
-            @else
-            <h5 class="mb-0 pt-1 text-nowrap">No Bids</h5>
-            @endif
-            <small class="text-muted"></small>
-          </div>
-          <div class="col-4">
-            <div class="divider divider-vertical">
-            </div>
-          </div>
-          <div class="col-4 text-end">
-            <div class="d-flex gap-2 justify-content-end align-items-center mb-2">
-              <p class="mb-0">Info</p>
-              <span class="badge bg-label-primary p-1 rounded">
-                 <a href="{{ route('app.procurement.biddings.show', $bidding->id) }}">
-                  <i class="ti ti-link ti-xs"></i>
-                 </a>
-                </span>
-            </div>
-            <h5 class="mb-0 pt-1 text-nowrap ms-lg-n3 ms-xl-0">
-            <img src="{{ asset('images/' . $bidding->image) }}" alt="Bidding Product Image" style="width: 50px; height: 45px; border: 2px solid lightblue;">
-          </h5>
-          </div>
-        </div>
-        <div class="d-flex align-items-center mt-4">
-    <div class="progress w-100" style="height: 8px;">
-        <div class="progress-bar" style="width: {{ $bidding->progress }}%"></div>
-    </div>
-</div>
-<div class="mt-2">
-    @if ($bidding->progress < 100)
-        <div class="text-center" id="countdown">
-            {{ $bidding->countdown }}
-        </div>
-    @else
-        <div class="text-center">End Date: {{ $bidding->end_date->format('F j, Y') }}</div>
-    @endif
-</div>
 
+
+  @foreach($biddings as $bidding)
+    @if($bidding->end_date > $currentDate)
+      <div class="col-lg-3 col-sm-6 mb-4">
+        <div class="card">
+          <div class="card-header">
+            <div class="d-flex justify-content-between">
+              <small class="d-block mb-1 text-muted">Current Bidding</small>
+              <p class="card-text text-success">Bids: {{ $bidding->bids->count() }}</p>
+            </div>
+            <h4 class="card-title mb-1">{{$bidding->name }}</h4>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-4">
+                <div class="d-flex gap-2 align-items-center mb-2">
+                  <span class="badge bg-success p-1 rounded"><i class="fas fa-money-bill ti-xs"></i></span>
+                  <p class="mb-0">Lowest Bid: </p>
+                </div>
+                @if ($bidding->bids()->count() && $bidding->lowestBid)
+                  <h5 class="mb-0 pt-1 text-nowrap">₱ {{$bidding->lowestBid->amount}}</h5>
+                @else
+                  <h5 class="mb-0 pt-1 text-nowrap">No Bids</h5>
+                @endif
+                <small class="text-muted"></small>
+              </div>
+              <div class="col-4">
+                <div class="divider divider-vertical"></div>
+              </div>
+              <div class="col-4 text-end">
+                <div class="d-flex gap-2 justify-content-end align-items-center mb-2">
+                  <p class="mb-0">Info</p>
+                  <span class="badge bg-label-primary p-1 rounded">
+                    <a href="{{ route('app.procurement.biddings.show', $bidding->id) }}">
+                      <i class="ti ti-link ti-xs"></i>
+                    </a>
+                  </span>
+                </div>
+                <h5 class="mb-0 pt-1 text-nowrap ms-lg-n3 ms-xl-0">
+                  <img src="{{ asset('images/' . $bidding->image) }}" alt="Bidding Product Image" style="width: 50px; height: 45px; border: 2px solid lightblue;">
+                </h5>
+              </div>
+            </div>
+            <div class="d-flex align-items-center mt-4">
+              <div class="progress w-100" style="height: 8px;">
+                <div class="progress-bar" style="width: {{ $bidding->progress }}%"></div>
+              </div>
+            </div>
+            <div class="mt-2">
+              @if ($bidding->progress < 100)
+                <div class="text-center" id="countdown">
+                  {{ $bidding->countdown }}
+                </div>
+              @else
+                <div class="text-center">End Date: {{ $bidding->end_date->format('F j, Y') }}</div>
+              @endif
+            </div>
+          </div>
+        </div>
+      </div>
+      @php
+        $activeBiddings++;
+      @endphp
+    @endif
+  @endforeach
+
+  @if($activeBiddings == 0)
+  <div class="col-lg-6 col-md-12 mb-4">
+    <div class="card h-100">
+      <div class="card-body text-center d-flex align-items-center justify-content-center">
+        <div class="card-header">
+          <h6 class="mb-0">No Bidding Now</h6>
+        </div>
       </div>
     </div>
   </div>
-  @endif
-  @endforeach
+@endif
+
   <!--/ Sales Overview -->
 
-
+  <div class="row">
   <!-- Bidding -->
   <div class="col-lg-3 col-sm-6 mb-4 text-center">
-  <div class="card">
+  <div class="card h-100">
     <div class="card-body">
       <div class="badge p-2 bg-label-success mb-2 rounded"><i class="fa-solid fa-file-contract ti-md"></i></div>
       <h5 class="card-title mb-1 pt-2">Bidding</h5>
@@ -252,7 +269,7 @@ $currentDate = now();
 
   <!-- Invoices -->
   <div class="col-lg-3 col-sm-6 mb-4 text-center">
-  <div class="card">
+  <div class="card h-100">
     <div class="card-body">
         <div class="badge p-2 bg-label-info mb-2 rounded"><i class="fa-solid fa-file-invoice ti-md"></i></div>
         <h5 class="card-title mb-1 pt-2">Invoices</h5>
@@ -267,7 +284,7 @@ $currentDate = now();
 
   <!-- Inventory -->
   <div class="col-lg-3 col-sm-6 mb-4 text-center">
-    <div class="card">
+  <div class="card h-100">
       <div class="card-body">
         <div class="badge p-2 bg-label-primary mb-2 rounded"><i class="fa-solid fa-store ti-md"></i></div>
         <h5 class="card-title mb-1 pt-2">Inventory</h5>
@@ -280,46 +297,32 @@ $currentDate = now();
     </div>
   </div>
 
+
   <div class="col-xl-3 col-md-6 mb-4">
   <div class="card h-100">
     <div class="card-header d-flex justify-content-between">
       <div class="card-title mb-0">
         <div class="badge p-2 bg-label-warning mb-2 rounded"><i class="fas fa-clock-rotate-left"></i></div>
-        <h5 class="card-title mb-1 pt-2">Sale History</h5>
-      </div>
-      <div class="dropdown">
-        <button class="btn p-0" type="button" id="activeProjects" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <i class="ti ti-dots-vertical ti-sm text-muted"></i>
-        </button>
-        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="activeProjects">
-          <a class="dropdown-item" href="javascript:void(0);">Refresh</a>
-          <a class="dropdown-item" href="javascript:void(0);">Download</a>
-          <a class="dropdown-item" href="javascript:void(0);">View All</a>
-        </div>
+        <h5 class="card-title mb-1 pt-2">Payment History</h5>
       </div>
     </div>
     <div class="card-body">
-      <ul class="list-unstyled p-0 m-0">
-        <li class="mb-3 pb-1 d-flex">
-          <div class="d-flex w-25 align-items-center me-3"> <!-- Adjusted width value to "w-25" -->
-            <img src="{{asset('assets/img/favicon/bbox-express-logo.png')}}" alt="laravel-logo" class="me-3" width="30" /> <!-- Adjusted the width value to "30" -->
-            <div>
-              <h6 class="mb-0">Laravel</h6>
-              <small class="text-muted">eCommerce</small>
+      <div class="payment-history" style="margin-top: 10px;">
+        @if($invoice && $invoice->payments->isNotEmpty())
+          @foreach($invoice->payments as $payment)
+            <div class="payment-item" style="margin-bottom: 10px; display: flex;">
+              <div class="payment-date" style="margin-right: 10px;">{{ $payment->created_at->format('F d, Y') }}</div>
+              <div class="payment-amount"> ₱ {{ $payment->amount }}</div>
+              <hr class="payment-line" style="margin-top: 10px; margin-bottom: 10px; border: none; border-top: 1px solid #ddd;">
             </div>
-          </div>
-          <div class="d-flex flex-grow-1 align-items-center">
-            <div class="progress w-100 me-3" style="height: 8px;">
-              <div class="progress-bar bg-danger" role="progressbar" style="width: 54%" aria-valuenow="54" aria-valuemin="0" aria-valuemax="100"></div>
-            </div>
-            <span class="text-muted">54%</span>
-          </div>
-        </li>
-      </ul>
+          @endforeach
+        @else
+          <div class="no-payment-history">No payment history available.</div>
+        @endif
+      </div>
     </div>
   </div>
 </div>
-
 
 
 

@@ -81,6 +81,7 @@ Route::get('/bids/{bid}/invoice/edit', [BidController::class, 'editInvoice'])
 
 Route::put('/bids/{bid}/invoice/update', [BidController::class, 'updateInvoice'])
      ->name('app.procurement.invoices.update');
+Route::post('/app/procurement/invoices/{invoice}/payment', [BidController::class, 'processPayment'])->name('app.procurement.invoices.payment');
 
 Route::middleware([
     'auth:sanctum',
@@ -106,4 +107,17 @@ Route::get('/test-winners', function () {
   }
 
   return "determineWinners function executed for $productsProcessed bidding products.";
+});
+
+Route::get('/phpinfo', function () {
+  return phpinfo();
+});
+Route::get('/gdtest', function () {
+  if (!function_exists('gd_info')) {
+      return 'GD extension is not installed.';
+  }
+
+  $gdInfo = gd_info();
+  return 'GD Support: Enabled <br>' .
+         'GD Version: ' . $gdInfo['GD Version'];
 });

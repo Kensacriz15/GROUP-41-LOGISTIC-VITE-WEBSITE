@@ -11,12 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-      Schema::create('settings', function (Blueprint $table) {
-        $table->id();
-        $table->string('name')->unique(); // Ensure 'current_budget' is unique
-        $table->string('value')->nullable(); // Or appropriate data type for your budget
-        $table->timestamps();
-    });
+        Schema::create('settings', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique(); // Ensure 'current_budget' is unique
+            $table->string('value')->nullable(); // Or appropriate data type for your budget
+            $table->timestamps();
+        });
+
+        // Insert the initial budget value
+        DB::table('settings')->insert([
+            'name' => 'current_budget',
+            'value' => '5000',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 
     /**

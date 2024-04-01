@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\ProcurementRequest;
 use App\Models\BiddingProduct;
+use App\Models\Invoice;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 use App\Models\Winner;
 use Illuminate\Support\Facades\Auth;
@@ -43,7 +45,14 @@ class HomePage extends Controller
 
         $winnersCount = Winner::count();
 
-        return view('app.home', compact('requests', 'biddings', 'totalbiddings', 'biddingProducts', 'winnersCount', 'totalBids'));
+        $purchaseInvoices = Invoice::count();
+        $budgetUse = Invoice::sum('amount_paid'); // Replace 'amount' with the actual column name for budget use
+        $numberOfInvoices = Invoice::count();
+        $currentBudget = 5000;
+
+        $invoice = Invoice::with('payments')->first();
+
+        return view('app.home', compact('requests', 'biddings', 'totalbiddings', 'biddingProducts', 'winnersCount', 'totalBids', 'invoice', 'purchaseInvoices', 'budgetUse', 'numberOfInvoices', 'currentBudget'));
     }
 
 

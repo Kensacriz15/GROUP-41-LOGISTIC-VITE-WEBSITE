@@ -9,24 +9,31 @@
         h1, h2 { text-align: center; margin-bottom: 15px; }
         .header-container { display: flex; align-items: center; }
         .logo-container { margin-right: 20px; }
-        .logo-container img { width: 200px; }
+        .logo-container img { max-width: 80px;  height: auto; }
         .company-info { font-weight: bold; }
     </style>
 </head>
 <body>
-<div class="header-container">
+
+<div class="header-container row">
     <div class="logo-container">
-    <img src="{{ public_path('images/logo.png') }}" alt="Logo">
+        <img src="{{ public_path('images/logo.png') }}" alt="Logo">
     </div>
 
-    <h1>Invoice #{{ $invoice->invoice_number }}</h1>
+
+    <div class="company-info">
+        <p>bbox express</p>
+        <p>Novaliches, Quezon City</p>
+        <p>09109091234</p>
+    </div>
 </div>
 
-<div class="company-info">
-    <p>bbox express</p>
-    <p>Novaliches, Quezon City</p>
-    <p>09109091234</p>
+    <div class="invoice-number-container">
+        <h1>Invoice #{{ $invoice->invoice_number }}</h1>
+    </div>
 </div>
+
+
 
 <h2>Invoice Details</h2>
 <table>

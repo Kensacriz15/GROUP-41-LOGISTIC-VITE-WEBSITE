@@ -1,11 +1,9 @@
 <?php
 
 namespace Database\Factories;
-use Illuminate\Database\Eloquent\Factories\Factory;
 
 use App\Models\Vendor;
-use App\database\factories\VendorFactory;
-
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class VendorFactory extends Factory
 {

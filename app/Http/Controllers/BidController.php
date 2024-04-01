@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BiddingProduct;
 use App\Models\Bid;
+use App\Models\Payment;
 use App\Events\NewBidPlaced;
 use Illuminate\Http\Request;
 use App\Models\Invoice;
@@ -150,6 +151,17 @@ class BidController extends Controller
         $invoice->balance = $invoice->total;
         $invoice->save();
 
+        // Update currentBudget
+        $currentBudget = DB::table('settings')
+            ->where('name', 'current_budget')
+            ->value('value');
+
+        $newBudget = $currentBudget - $invoice->total;
+
+        DB::table('settings')
+            ->where('name', 'current_budget')
+            ->update(['value' => $newBudget]);
+
         // Generate PDF
         $pdf = PDF::loadView('app.procurement.invoices.invoice-template', [
             'invoice' => $invoice,
@@ -245,20 +257,69 @@ public function updateInvoice(Request $request, $invoiceId)
     return redirect()->back()->with('success', 'Invoice updated successfully');
 }
 
-    public function indexInvoices()
-    {
-        $invoices = Invoice::with('bid')->paginate(10);
+public function indexInvoices()
+{
+    $invoices = Invoice::with('bid')->paginate(10);
 
-        // Fetch the budget
-        $currentBudget = DB::table('settings')
+    // Fetch the budget
+    $currentBudget = DB::table('settings')
         ->where('name', 'current_budget')
-        ->value('value') ?? 5000;
+        ->value('value');
 
-        return view('app.procurement.invoices.index-invoices', compact('invoices', 'currentBudget'));
+    // Calculate the invoice balance and update the status
+    foreach ($invoices as $invoice) {
+        $invoice->balance = $invoice->total - $invoice->amount_paid;
+        $invoice->status = $invoice->balance > 0 ? 'Unpaid' : 'Paid';
     }
+
+    // Update the current budget by deducting the total balance of unpaid invoices
+    $unpaidInvoicesBalance = $invoices->sum(function ($invoice) {
+        return $invoice->balance > 0 ? $invoice->balance : 0;
+    });
+
+    $currentBudget -= $unpaidInvoicesBalance;
+
+    return view('app.procurement.invoices.index-invoices', compact('invoices', 'currentBudget'));
+}
+
 public function editInvoice($bidId)
 {
     $invoice = Invoice::with('bid')->findOrFail($bidId);
     return view('app.procurement.invoices.edit-invoice', compact('invoice'));
+}
+public function processPayment(Request $request, Invoice $invoice)
+{
+    $validatedData = $request->validate([
+        'amount_paid' => 'required|numeric|min:0.01',
+    ]);
+
+    $newPaymentAmount = $validatedData['amount_paid'];
+
+    // Get the old payment amount
+    $oldPaymentAmount = $invoice->amount_paid;
+
+    // *** Original Payment Logic (no changes needed) ***
+    $invoice->amount_paid += $newPaymentAmount;
+    $invoice->save();
+
+    // *** Update currentBudget ***
+    $currentBudget = DB::table('settings')
+        ->where('name', 'current_budget')
+        ->value('value');
+
+    $newBudget = $currentBudget - ($newPaymentAmount - $oldPaymentAmount);
+    $newBudget = max($newBudget, 5000); // Ensure the budget is not less than 5000
+
+    DB::table('settings')
+        ->where('name', 'current_budget')
+        ->update(['value' => $newBudget]);
+
+    Payment::create([
+        'invoice_id' => $invoice->id,
+        'amount' => $newPaymentAmount,
+    ]);
+
+    return redirect()->route('app.procurement.invoices.index')
+        ->with('success', 'Payment recorded for Invoice #' . $invoice->invoice_number);
 }
   }

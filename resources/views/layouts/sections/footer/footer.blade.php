@@ -8,14 +8,13 @@ $containerFooter = (isset($configData['contentLayout']) && $configData['contentL
     <div class="footer-container d-flex align-items-center justify-content-between py-2 flex-md-row flex-column">
       <div>
         © <script>document.write(new Date().getFullYear())
-      </script>, made with ❤️ by <a href="{{ (!empty(config('variables.creatorUrl')) ? config('variables.creatorUrl') : '') }}" target="_blank" class="footer-link text-primary fw-medium">{{ (!empty(config('variables.creatorName')) ? config('variables.creatorName') : '') }}</a>
+      </script>,  GROUP-41-LOGISTIC ❤️
       </div>
       <div class="d-none d-lg-inline-block">
-        <a href="{{ config('variables.licenseUrl') ? config('variables.licenseUrl') : '#' }}" class="footer-link me-4" target="_blank">License</a>
-        <a href="{{ config('variables.moreThemes') ? config('variables.moreThemes') : '#' }}" target="_blank" class="footer-link me-4">More Themes</a>
-        <a href="{{ config('variables.documentation') ? config('variables.documentation').'/laravel-introduction.html' : '#' }}" target="_blank" class="footer-link me-4">Documentation</a>
-        <a href="{{ config('variables.support') ? config('variables.support') : '#' }}" target="_blank" class="footer-link d-none d-sm-inline-block">Support</a>
-      </div>
+        <a href="/" class="footer-link me-4" >Home</a>
+        <a href="/" class="footer-link me-4" >Help</a>
+        <a href="https://github.com/Kensacriz15/GROUP-41-LOGISTIC-VITE-WEBSITE" class="footer-link me-4" >Github</a>
+        <a href="/" class="footer-link me-4" >Support</a>
     </div>
   </div>
 </footer>

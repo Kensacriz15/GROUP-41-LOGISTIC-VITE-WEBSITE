@@ -27,6 +27,7 @@ class Invoice extends Model
         'notes',
         'amount_paid',
         'balance',
+        'status',
     ];
 
     protected $casts = [
@@ -37,4 +38,12 @@ class Invoice extends Model
   {
       return $this->belongsTo(Bid::class); // Assuming a one-to-one
   }
+  public function isPaid()
+{
+    return $this->balance <= 0;
+}
+public function payments()
+{
+    return $this->hasMany(Payment::class);
+}
 }
