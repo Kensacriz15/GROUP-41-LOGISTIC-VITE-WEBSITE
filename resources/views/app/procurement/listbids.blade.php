@@ -1,82 +1,117 @@
-@extends('layouts.layoutMaster')
+  @extends('layouts.layoutMaster')
 
-@section('title', $biddingProduct->name)
+  @section('title', $biddingProduct->name)
 
-@section('content')
-    <h1>Bidding Product: {{ $biddingProduct->name }}</h1>
+  @section('content')
+      <h1>Bidding Product: {{ $biddingProduct->name }}</h1>
 
-    <h2>Bids</h2>
+      <div class="row">
+          <div class="col-md-6 mb-4">
+              <div class="card">
+                  <div class="card-header">Bids</div>
+                  <div class="card-body">
+                  <button type="button" onclick="showLowestBids()" class="btn btn-sm btn-success mb-2" style="float: right;">Show Lowest</button>                    @if ($biddingProduct->bids->count() > 0)
+                          <table class="bids-table table table-striped table-bordered">
+                              <thead>
+                                  <tr>
+                                      <th>Amount</th>
+                                      <th>Bidder Type</th>
+                                      <th>Bidder Name</th>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                                  @foreach ($biddingProduct->bids as $bid)
+                                      <tr>
+                                          <td>{{ $bid->amount }}</td>
+                                          <td>{{ $bid->supplier ? 'Supplier' : 'Vendor' }}</td>
+                                          <td>
+                                              @if ($bid->supplier)
+                                                  {{ $bid->supplier->supplier_name }}
+                                              @elseif($bid->vendor)
+                                                  {{ $bid->vendor->vendor_name }}
+                                              @endif
+                                          </td>
+                                      </tr>
+                                  @endforeach
+                              </tbody>
+                          </table>
+                      @else
+                          <p>No bids have been placed for this product yet.</p>
+                      @endif
+                  </div>
+              </div>
+          </div>
+          <div class="col-md-6 mb-4">
+              <div class="card">
+                  <div class="card-header">Winners</div>
+                  <div class="card-body">
+                      @if ($biddingProduct->winners->count() > 0)
+                          <table class="winners-table table table-striped table-bordered">
+                              <thead>
+                                  <tr>
+                                      <th>Product</th>
+                                      <th>Winning Bidder</th>
+                                      <th>Amount</th>
+                                      <th>Action</th>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                                  @foreach ($biddingProduct->winners as $winner)
+                                      <tr>
+                                          <td>{{ $biddingProduct->name }}</td>
+                                          <td>
+                                              @if ($winner->bid->supplier)
+                                                  {{ $winner->bid->supplier->supplier_name }} (Supplier)
+                                              @else
+                                                  {{ $winner->bid->vendor->vendor_name }} (Vendor)
+                                              @endif
+                                          </td>
+                                          <td>{{ $winner->bid->amount }}</td>
+                                          <td>
+                                          <button type="button" onclick="window.location.href='{{ route('createInvoice', ['winnerId' => $winner->id]) }}'" class="btn btn-sm btn-warning mb-2">Create Invoice</button>
+                                          </td>
+                                      </tr>
+                                  @endforeach
+                              </tbody>
+                          </table>
+                      @endif
+                  </div>
+              </div>
+          </div>
+      </div>
 
-    <button type="button" onclick="showWinners()">Show Winners</button>
+      <style>
+          .bids-table {
+              width: 100%;
+          }
 
-    @if ($biddingProduct->bids->count() > 0)
-        <table class="bids-table">
-            <thead>
-                <tr>
-                    <th>Amount</th>
-                    <th>Bidder Type</th>
-                    <th>Bidder Name</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($biddingProduct->bids as $bid)
-                    <tr>
-                        <td>{{ $bid->amount }}</td>
-                        <td>{{ $bid->supplier ? 'Supplier' : 'Vendor' }}</td>
-                        <td>
-                            @if ($bid->supplier)
-                                {{ $bid->supplier->supplier_name }}
-                            @elseif($bid->vendor)
-                                {{ $bid->vendor->vendor_name }}
-                            @endif
-                        </td>
-                        <td>
-            <button type="button" onclick="createInvoice({{ $bid->id }})">Create Invoice</button>
-        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    @else
-        <p>No bids have been placed for this product yet.</p>
-    @endif
+          .bids-table th,
+          .bids-table td {
+              padding: 8px;
+          }
 
-    @if ($biddingProduct->winners->count() > 0)
-        <h2>Winners</h2>
-        @foreach ($biddingProduct->winners as $winner)
-            <div class="winner-card">
-                <p><strong>Product:</strong> {{ $biddingProduct->name }}</p>
-                <p><strong>Winning Bidder:</strong>
-                @if ($winner->bid->supplier)
-                    {{ $winner->bid->supplier->supplier_name}} (Supplier)
-                @else
-                    {{ $winner->bid->vendor->vendor_name}} (Vendor)
-                @endif
-                </p>
-                <p><strong>Amount:</strong> {{ $winner->bid->amount }}</p>
-                <button type="button" onclick="window.location.href='{{ route('createInvoice', ['bidId' => $bid->id]) }}'">Create Invoice</button>
-            </div>
-        @endforeach
-    @endif
+          .winners-table {
+              width: 100%;
+          }
 
-    <script>
-        function showWinners() { /* ... your existing sorting code ... */ }
-        function createInvoice(winnerId) { /* ...  Your invoice creation logic ... */ }
-    </script>
-    <script>
-        function showWinners() {
-            const bidRows = document.querySelectorAll('.bids-table tbody tr');
-            const bidsArray = Array.from(bidRows);
+          .winners-table th,
+          .winners-table td {
+              padding: 8px;
+          }
+      </style>
 
-            bidsArray.sort((a, b) => {
-                const amountA = parseFloat(a.querySelector('td:first-child').textContent);
-                const amountB = parseFloat(b.querySelector('td:first-child').textContent);
-                return amountA - amountB;
-            });
+      <script>
+          function showLowestBids() {
+              const bidRows = Array.from(document.querySelectorAll('.bids-table tbody tr'));
+              bidRows.sort((a, b) => {
+                  const amountA = parseFloat(a.querySelector('td').textContent);
+                  const amountB = parseFloat(b.querySelector('td').textContent);
+                  return amountA - amountB;
+              });
+              const tbody = document.querySelector('.bids-table tbody');
+              tbody.innerHTML = '';
+              bidRows.forEach(row => tbody.appendChild(row));
+          }
 
-            const bidsTbody = document.querySelector('.bids-table tbody');
-            bidsTbody.innerHTML = '';
-            bidsArray.forEach(bidRow => bidsTbody.appendChild(bidRow));
-        }
-    </script>
-@endsection
+      </script>
+  @endsection

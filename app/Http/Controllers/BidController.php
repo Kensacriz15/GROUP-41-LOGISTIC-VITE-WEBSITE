@@ -5,9 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\BiddingProduct;
 use App\Models\Bid;
 use App\Models\Payment;
+use App\Models\Invoice;
+use App\Models\Winner;
 use App\Events\NewBidPlaced;
 use Illuminate\Http\Request;
-use App\Models\Invoice;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
@@ -53,6 +54,7 @@ class BidController extends Controller
 
         return view('app.procurement.listbids', compact('biddingProduct'));
     }
+
     public function determineWinners()
     {
         $this->where('end_date', '<=', now())->each(function ($product) {
@@ -90,87 +92,122 @@ class BidController extends Controller
     }
 
     public function createInvoice($bidId)
-    {
-        // Check if an invoice already exists for the bid
-        $existingInvoice = Invoice::where('bid_id', $bidId)->first();
-        if ($existingInvoice) {
-            // Return the existing invoice as a download
-            $pdf = PDF::loadView('app.procurement.invoices.invoice-template', [
-                'invoice' => $existingInvoice,
-                'logoPath' => public_path('images/logo.png')
-            ]);
-            return $pdf->stream('invoice.pdf');
-        }
+{
+    // Check if a winner exists for the given bid ID
+    $winner = Winner::where('bid_id', $bidId)->firstOrFail();
 
-        // 1. Fetch Bid Data with Relationships
-        $biddingProduct = BiddingProduct::with('winners.supplier', 'winners.vendor')
-            ->whereHas('winners', function ($query) use ($bidId) {
-                $query->where('bid_id', $bidId);
-            })
-            ->firstOrFail();
+    // ADJUSTMENT: Handle bids that are automatically winners (i.e., sole bids)
+    if (!$winner) {
+        // Retrieve product directly if no winner exists
+        $biddingProduct = Bid::findOrFail($bidId)->biddingProduct;
+    } else {
+        // Get product through the 'bid' relationship if a winner exists
+        $bid = $winner->bid;
+        $biddingProduct = $bid->biddingProduct;
+    }
 
-        // Find Winning Bid
-        $bid = $biddingProduct->winners->where('bid_id', $bidId)->first();
+    // Retrieve the necessary data for creating the invoice
+    $bid = $winner->bid;
+    $biddingProduct = $bid->biddingProduct;
 
-        // 2. Create Invoice
-        $invoice = new Invoice();
-        $invoice->invoice_number = $this->generateInvoiceNumber();
-
-        // 3. Populate Invoice Items
-        $invoice->items = [
-            [
-                'description' => $bid->biddingProduct->name,
-                'qty' => 1,
-                'price' => $bid->amount
-            ]
-        ];
-
-        // Calculate subtotal, tax, and total
-        $invoice->subtotal = $this->calculateSubtotal($invoice->items);
-        $invoice->tax = $this->calculateTax($invoice->subtotal);
-        $invoice->total = $invoice->subtotal + $invoice->tax;
-
-        // Set invoice dates
-        $invoice->invoice_date = now();
-        $invoice->due_date = now()->addDays(30);
-
-        // Set invoice contact
-        if ($bid->supplier) {
-            $invoice->invoice_to_name = $bid->supplier->supplier_name;
-        } else if ($bid->vendor) {
-            $invoice->invoice_to_name = $bid->vendor->vendor_name;
-        } else {
-            $invoice->invoice_to_name = 'Unknown';
-        }
-
-        // Link Invoice to Bid
-        $invoice->bid_id = $bid->id;
-
-        // Save the Invoice
-        $invoice->amount_paid = 0;
-        $invoice->balance = $invoice->total;
-        $invoice->save();
-
-        // Update currentBudget
-        $currentBudget = DB::table('settings')
-            ->where('name', 'current_budget')
-            ->value('value');
-
-        $newBudget = $currentBudget - $invoice->total;
-
-        DB::table('settings')
-            ->where('name', 'current_budget')
-            ->update(['value' => $newBudget]);
-
-        // Generate PDF
+    // Check if an invoice already exists for the bid
+    $existingInvoice = Invoice::where('bid_id', $bid->id)->first();
+    if ($existingInvoice) {
+        // Return the existing invoice as a download
         $pdf = PDF::loadView('app.procurement.invoices.invoice-template', [
-            'invoice' => $invoice,
+            'invoice' => $existingInvoice,
             'logoPath' => public_path('images/logo.png')
         ]);
-
-        // Return the PDF as a download
         return $pdf->stream('invoice.pdf');
     }
+
+    // Create the invoice
+    $invoice = new Invoice();
+    $invoice->invoice_number = $this->generateInvoiceNumber();
+
+    // Populate invoice items
+    $invoiceItems = [];
+
+    $biddingProduct = $bid->biddingProduct;
+    $invoiceItems[] = [
+        'description' => $biddingProduct->name,
+        'qty' => 1,
+        'price' => $bid->amount
+    ];
+
+    $invoice->items = $invoiceItems;
+
+    // Calculate subtotal, tax, and total
+    $invoice->subtotal = $this->calculateSubtotal($invoice->items);
+    $invoice->tax = $this->calculateTax($invoice->subtotal);
+    $invoice->total = $invoice->subtotal + $invoice->tax;
+
+    // Set invoice dates
+    $invoice->invoice_date = now();
+    $invoice->due_date = now()->addDays(30);
+
+    // Set invoice contact
+    if ($bid->supplier) {
+        $invoice->invoice_to_name = $bid->supplier->supplier_name;
+    } else if ($bid->vendor) {
+        $invoice->invoice_to_name = $bid->vendor->vendor_name;
+    } else {
+        $invoice->invoice_to_name = 'Unknown';
+    }
+
+    // Link Invoice to Bid
+    $invoice->bid_id = $bid->id;
+
+    // Save the Invoice
+    $invoice->amount_paid = 0;
+    $invoice->balance = $invoice->total;
+    $invoice->save();
+
+    // Update currentBudget
+    $currentBudget = DB::table('settings')
+        ->where('name', 'current_budget')
+        ->value('value');
+
+    $newBudget = $currentBudget - ($invoice->total - $invoice->amount_paid); // Adjust the calculation
+
+    DB::table('settings')
+        ->where('name', 'current_budget')
+        ->update(['value' => $newBudget]);
+
+    // Generate PDF
+    $pdf = PDF::loadView('app.procurement.invoices.invoice-template', [
+        'invoice' => $invoice,
+        'logoPath' => public_path('images/logo.png')
+    ]);
+
+    // Return the PDF as a download
+    return $pdf->stream('invoice.pdf');
+}
+
+
+    public function deletePayment($invoiceId)
+{
+    // Retrieve the invoice
+    $invoice = Invoice::findOrFail($invoiceId);
+
+    // Update currentBudget
+    $currentBudget = DB::table('settings')
+        ->where('name', 'current_budget')
+        ->value('value');
+
+    $newBudget = $currentBudget + $invoice->amount_paid; // Add the payment amount back to the budget
+
+    DB::table('settings')
+        ->where('name', 'current_budget')
+        ->update(['value' => $newBudget]);
+
+    // Update the invoice amount_paid and balance
+    $invoice->amount_paid = 0;
+    $invoice->balance = $invoice->total;
+    $invoice->save();
+
+    // Return a response or redirect as needed
+}
 
     function generateInvoiceNumber()
     {
@@ -213,9 +250,9 @@ class BidController extends Controller
         return $discount;
     }
 
-    function calculateTotal($subtotal, $discount)
+    function calculateTotal($subtotal, $discount, $tax)
     {
-        return $subtotal - $discount;
+      return $subtotal - $discount + $tax;
     }
     public function calculateSubtotal($items)
 {
@@ -322,4 +359,5 @@ public function processPayment(Request $request, Invoice $invoice)
     return redirect()->route('app.procurement.invoices.index')
         ->with('success', 'Payment recorded for Invoice #' . $invoice->invoice_number);
 }
+
   }

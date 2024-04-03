@@ -51,8 +51,8 @@
                   <div class="col-6">
                     <ul class="list-unstyled mb-0">
                       <li class="d-flex mb-4 align-items-center">
-                        <p class="mb-0 fw-medium me-2 website-analytics-text-bg">{{ count($requests) }}</p>
-                        <p class="mb-0">Total Requests</p>
+                        <p class="mb-0 fw-medium me-2 website-analytics-text-bg">{{ $totalRequests  }}</p>
+                        <p class="mb-0">Total Approved</p>
                       </li>
                       <li class="d-flex align-items-center mb-2">
                         <p class="mb-0 fw-medium me-2 website-analytics-text-bg">{{ $totalbiddings ?? '0' }}</p>
@@ -102,10 +102,17 @@
         </div>
         <div class="col-6">
           <ul class="list-unstyled mb-0">
-            <li class="d-flex mb-4 align-items-center">
-              <p class="mb-0 fw-medium me-2 website-analytics-text-bg">{{ $currentBudget - ($invoice->amount_paid ?? 0) }}</p>
-              <p class="mb-0">Invoice Balance</p>
-            </li>
+          <li class="d-flex mb-4 align-items-center">
+            <div style="width: 100px;">
+                @php
+                    $invoices = App\Models\Invoice::all(); // Fetch the invoices data
+                    $totalAmountPaid = $invoices->sum('amount_paid');
+                    $invoiceBalance = $currentBudget - $totalAmountPaid;
+                @endphp
+                <p class="mb-0 fw-medium me-2 website-analytics-text-bg">{{ $invoiceBalance ?? 'N/A' }}</p>
+            </div>
+            <p class="mb-0">Invoice Balance</p>
+        </li>
             <li class="d-flex align-items-center mb-2">
               <p class="mb-0 fw-medium me-2 website-analytics-text-bg">//</p>
               <p class="mb-0">Completed Transactions</p>
@@ -297,28 +304,31 @@ $activeBiddings = 0;
     </div>
   </div>
 
-
-  <div class="col-xl-3 col-md-6 mb-4">
+<!-- Payment History -->
+<div class="col-xl-3 col-md-6 mb-4">
   <div class="card h-100">
     <div class="card-header d-flex justify-content-between">
       <div class="card-title mb-0">
         <div class="badge p-2 bg-label-warning mb-2 rounded"><i class="fas fa-clock-rotate-left"></i></div>
-        <h5 class="card-title mb-1 pt-2">Payment History</h5>
+        <h5 class="card-title mb-3 pt-2">Payment History</h5>
       </div>
     </div>
     <div class="card-body">
-      <div class="payment-history" style="margin-top: 10px;">
-        @if($invoice && $invoice->payments->isNotEmpty())
-          @foreach($invoice->payments as $payment)
-            <div class="payment-item" style="margin-bottom: 10px; display: flex;">
-              <div class="payment-date" style="margin-right: 10px;">{{ $payment->created_at->format('F d, Y') }}</div>
-              <div class="payment-amount"> ₱ {{ $payment->amount }}</div>
-              <hr class="payment-line" style="margin-top: 10px; margin-bottom: 10px; border: none; border-top: 1px solid #ddd;">
-            </div>
-          @endforeach
-        @else
-          <div class="no-payment-history">No payment history available.</div>
-        @endif
+      <div class="payment-history" style="margin-top: 2px;">
+      <hr class="payment-line" style="margin-top: 5px; margin-bottom: 5px; border: none; border-top: 1px solid #ddd;">
+        @foreach($invoices as $invoice)
+          @if($invoice->payments->isNotEmpty())
+            @foreach($invoice->payments as $payment)
+              <div class="payment-item" style="margin-bottom: 10px; display: flex;">
+                <div class="payment-date" style="margin-right: 10px;">{{ $payment->created_at->format('F d, Y') }}</div>
+                <div class="payment-amount">₱ {{ $payment->amount }}</div>
+              </div>
+              <hr class="payment-line" style="margin-top: 5px; margin-bottom: 5px; border: none; border-top: 1px solid #ddd;">
+            @endforeach
+          @else
+            <div class="no-payment-history">No payment history available.</div>
+          @endif
+        @endforeach
       </div>
     </div>
   </div>
@@ -339,7 +349,7 @@ $activeBiddings = 0;
         <div class="card-body">
             <div class="row">
             <h4 style="text-align: center;">Recent Procurement Requests</h4>
-                @foreach($requests as $request)
+                @forelse($limitedRequests as $request)
                 <div class="col-sm-4 mb-4">
                     <div class="card bg-light border-success">
                         <div class="card-body">
@@ -350,10 +360,14 @@ $activeBiddings = 0;
                         </div>
                     </div>
                 </div>
-                @endforeach
+                @empty
+                <p class="text-center text-danger">No recent procurement requests available.</p>
+                @endforelse
             </div>
         </div>
+        @if(!$limitedRequests->isEmpty())
         <a href="{{ route('app.procurement.listrequest', $request) }}" class="btn btn-sm btn-warning">Show More</a>
+        @endif
     </div>
 </div>
 

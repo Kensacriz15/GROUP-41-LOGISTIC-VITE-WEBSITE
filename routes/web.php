@@ -16,7 +16,8 @@ use App\Http\Controllers\BiddingProductController;
 use App\Http\Controllers\BidController;
 use App\Http\Controllers\ApiController;
 use App\Models\BiddingProduct;
-use App\Models\InvoiceController;
+use App\Models\Invoice;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -68,10 +69,9 @@ Route::put('/bids/{bid}', [YourBidController::class, 'updateBid'])->name('bids.u
 Route::get('/procurement-indexbids', [BidController::class, 'index'])->name('app.procurement.indexbids');
 Route::get('/procurement-listbids/{productId}', [BidController::class, 'show'])->name('app.procurement.listbids');
 Route::get('/invoice/view/{invoiceId}', [BidController::class, 'viewInvoice'])->name('viewInvoice');
-Route::get('/invoice/create/{bidId}', [BidController::class, 'createInvoice'])->name('createInvoice');
 Route::put('/invoice/update/{invoiceId}', [BidController::class, 'updateInvoice'])->name('updateInvoice');
 Route::get('app/procurement/invoices/invoice-template/{invoiceId}', [BidController::class, 'viewInvoice'])->name('app.procurement.invoices.invoice-template');
-Route::get('/invoices/create/{bidId}', [BidController::class, 'createInvoice'])->name('createInvoice');
+Route::get('/invoice/create/{winnerId}', [BidController::class, 'createInvoice'])->name('createInvoice');
 
 Route::get('/invoices', [BidController::class, 'indexInvoices'])
      ->name('app.procurement.invoices.index');
@@ -93,7 +93,10 @@ Route::middleware([
     })->name('dashboard');
 });
 Route::get('/test-winners', function () {
-  $biddingProducts = BiddingProduct::whereDoesntHave('winners')->get(); // Get the bidding products without winners
+  Log::debug("determineWinners function started");
+  $biddingProducts = BiddingProduct::where('end_date', '<=', now())
+      ->whereDoesntHave('winners')
+      ->get();
 
   if ($biddingProducts->isEmpty()) {
       return "Winners already determined for all bidding products.";
@@ -102,6 +105,10 @@ Route::get('/test-winners', function () {
   $productsProcessed = 0;
 
   foreach ($biddingProducts as $biddingProduct) {
+      if ($biddingProduct->winners->count() > 0) {
+          continue; // Skip to the next product if winners already exist
+      }
+
       $biddingProduct->determineWinners();
       $productsProcessed++;
   }

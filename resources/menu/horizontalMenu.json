@@ -5,6 +5,12 @@
       "name": "Home",
       "icon": "menu-icon tf-icons ti ti-smart-home",
       "slug": "app.home"
+    },
+    {
+      "url": "/procurement-indexbids",
+      "name": "Inventory Management",
+      "icon": "menu-icon tf-icons ti ti-package",
+      "slug": "app.procurement.indexbids"
     }
   ]
 }

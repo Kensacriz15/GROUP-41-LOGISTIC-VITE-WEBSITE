@@ -13,47 +13,48 @@ use Carbon\Carbon;
 
 class HomePage extends Controller
 {
-    public function index()
-    {
-        $requests = ProcurementRequest::where('status', 'approved')
-            ->latest()
-            ->limit(3)
-            ->get();
+  public function index()
+  {
+      $requests = ProcurementRequest::where('status', 'approved')
+          ->latest()
+          ->get();
 
-        $totalRequests = $requests->count();
+      $totalRequests = $requests->count();
 
-        $biddingProducts = BiddingProduct::with('bids')->get();
-        $totalBids = $biddingProducts->sum(function ($biddingProduct) {
-            return $biddingProduct->bids->count();
-        });
+      $limitedRequests = $requests->take(3);
 
-        $biddings = BiddingProduct::latest()->limit(3)->get();
-        $totalbiddings = $biddings->count();
+      $biddingProducts = BiddingProduct::with('bids')->get();
+      $totalBids = $biddingProducts->sum(function ($biddingProduct) {
+          return $biddingProduct->bids->count();
+      });
 
-        foreach ($biddings as $bidding) {
-            if (!$bidding->start_date instanceof Carbon\Carbon) {
-                $bidding->start_date = Carbon::parse($bidding->start_date);
-            }
+      $biddings = BiddingProduct::latest()->limit(3)->get();
+      $totalBiddings = $biddings->count();
 
-            if (!$bidding->end_date instanceof Carbon\Carbon) {
-                $bidding->end_date = Carbon::parse($bidding->end_date);
-            }
+      foreach ($biddings as $bidding) {
+          if (!$bidding->start_date instanceof Carbon\Carbon) {
+              $bidding->start_date = Carbon::parse($bidding->start_date);
+          }
 
-            $bidding->progress = $this->calculate_progress($bidding->start_date, $bidding->end_date);
-            $bidding->countdown = $this->calculate_countdown($bidding->end_date);
-        }
+          if (!$bidding->end_date instanceof Carbon\Carbon) {
+              $bidding->end_date = Carbon::parse($bidding->end_date);
+          }
 
-        $winnersCount = Winner::count();
+          $bidding->progress = $this->calculate_progress($bidding->start_date, $bidding->end_date);
+          $bidding->countdown = $this->calculate_countdown($bidding->end_date);
+      }
 
-        $purchaseInvoices = Invoice::count();
-        $budgetUse = Invoice::sum('amount_paid'); // Replace 'amount' with the actual column name for budget use
-        $numberOfInvoices = Invoice::count();
-        $currentBudget = 5000;
+      $winnersCount = Winner::count();
 
-        $invoice = Invoice::with('payments')->first();
+      $purchaseInvoices = Invoice::count();
+      $budgetUse = Invoice::sum('amount_paid'); // Replace 'amount' with the actual column name for budget use
+      $numberOfInvoices = Invoice::count();
+      $currentBudget = 5000;
 
-        return view('app.home', compact('requests', 'biddings', 'totalbiddings', 'biddingProducts', 'winnersCount', 'totalBids', 'invoice', 'purchaseInvoices', 'budgetUse', 'numberOfInvoices', 'currentBudget'));
-    }
+      $invoice = Invoice::with('payments')->first(); // Fetch a single invoice with its payments
+
+      return view('app.home', compact('limitedRequests', 'biddings', 'totalBiddings', 'biddingProducts', 'winnersCount', 'totalBids', 'invoice', 'purchaseInvoices', 'budgetUse', 'numberOfInvoices', 'currentBudget', 'totalRequests'));
+  }
 
 
 private function calculate_progress($start_date, $end_date)
