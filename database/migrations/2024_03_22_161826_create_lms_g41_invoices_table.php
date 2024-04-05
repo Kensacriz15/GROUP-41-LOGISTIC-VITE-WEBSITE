@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('invoices', function (Blueprint $table) {
+        Schema::create('lms_g41_invoices', function (Blueprint $table) {
             $table->id();
             $table->string('invoice_number')->unique();
 
@@ -31,14 +31,14 @@ return new class extends Migration
             // Consider adding a foreign key if billing a different entity
             // $table->foreignId('bill_to_id')->nullable()->constrained();
 
-            // Invoice Items (We'll discuss this shortly)
+            // Invoice Items
             $table->decimal('tax', 10, 2);
             $table->decimal('subtotal', 10, 2);
             $table->decimal('total', 10, 2);
             $table->foreignId('bid_id')->constrained('lms_g49_bids');
             $table->text('notes')->nullable();
             $table->json('items');
-
+            $table->string('status')->default('Unpaid');
             //Locked PDF
             //$table->boolean('is_pdf_generated')->default(false);
 
@@ -51,6 +51,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('invoices');
+        Schema::dropIfExists('lms_g41_invoices');
     }
 };

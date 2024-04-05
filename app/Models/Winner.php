@@ -9,6 +9,7 @@ class Winner extends Model
 {
     use HasFactory;
 
+    protected $table = 'lms_g41_winners';
     protected $fillable = ['bidding_product_id', 'bid_id', /* ... other fields */];
 
     public function biddingProduct()

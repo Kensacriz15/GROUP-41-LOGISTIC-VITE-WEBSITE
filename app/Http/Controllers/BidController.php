@@ -164,13 +164,13 @@ class BidController extends Controller
     $invoice->save();
 
     // Update currentBudget
-    $currentBudget = DB::table('settings')
+    $currentBudget = DB::table('lms_g41_settings')
         ->where('name', 'current_budget')
         ->value('value');
 
     $newBudget = $currentBudget - ($invoice->total - $invoice->amount_paid); // Adjust the calculation
 
-    DB::table('settings')
+    DB::table('lms_g41_settings')
         ->where('name', 'current_budget')
         ->update(['value' => $newBudget]);
 
@@ -191,13 +191,13 @@ class BidController extends Controller
     $invoice = Invoice::findOrFail($invoiceId);
 
     // Update currentBudget
-    $currentBudget = DB::table('settings')
+    $currentBudget = DB::table('lms_g41_settings')
         ->where('name', 'current_budget')
         ->value('value');
 
     $newBudget = $currentBudget + $invoice->amount_paid; // Add the payment amount back to the budget
 
-    DB::table('settings')
+    DB::table('lms_g41_settings')
         ->where('name', 'current_budget')
         ->update(['value' => $newBudget]);
 
@@ -299,7 +299,7 @@ public function indexInvoices()
     $invoices = Invoice::with('bid')->paginate(10);
 
     // Fetch the budget
-    $currentBudget = DB::table('settings')
+    $currentBudget = DB::table('lms_g41_settings')
         ->where('name', 'current_budget')
         ->value('value');
 
@@ -340,14 +340,14 @@ public function processPayment(Request $request, Invoice $invoice)
     $invoice->save();
 
     // *** Update currentBudget ***
-    $currentBudget = DB::table('settings')
+    $currentBudget = DB::table('lms_g41_settings')
         ->where('name', 'current_budget')
         ->value('value');
 
     $newBudget = $currentBudget - ($newPaymentAmount - $oldPaymentAmount);
     $newBudget = max($newBudget, 5000); // Ensure the budget is not less than 5000
 
-    DB::table('settings')
+    DB::table('lms_g41_settings')
         ->where('name', 'current_budget')
         ->update(['value' => $newBudget]);
 

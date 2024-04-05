@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('settings', function (Blueprint $table) {
+        Schema::create('lms_g41_settings', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique(); // Ensure 'current_budget' is unique
             $table->string('value')->nullable(); // Or appropriate data type for your budget
@@ -19,7 +19,7 @@ return new class extends Migration
         });
 
         // Insert the initial budget value
-        DB::table('settings')->insert([
+        DB::table('lms_g41_settings')->insert([
             'name' => 'current_budget',
             'value' => '5000',
             'created_at' => now(),
@@ -32,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('settings');
+        Schema::dropIfExists('lms_g41_settings');
     }
 };

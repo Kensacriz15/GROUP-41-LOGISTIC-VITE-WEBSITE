@@ -9,6 +9,7 @@ class Invoice extends Model
 {
     use HasFactory;
 
+    protected $table = 'lms_g41_invoices';
     protected $fillable = [
         'invoice_number',
         'company_name',

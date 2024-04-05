@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text('delivery_terms')->nullable();
             $table->text('other_notes')->nullable();
             $table->string('status', 255)->nullable();
+            $table->unsignedBigInteger('bidder_id')->nullable();
             $table->timestamps();
 
             $table->foreign('procurement_request_id')

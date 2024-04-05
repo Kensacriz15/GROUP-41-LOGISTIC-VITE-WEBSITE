@@ -122,7 +122,7 @@
       </div>
     </div>
     <div class="col-lg-5 col-md-3 col-12 order-1 order-md-2 my-4 my-md-0 text-center">
-      <i class="fa-solid fa-peso-sign" style="font-size: 170px;" alt="Website Analytics" width="170" class="card-website-analytics-img"></i>
+      <i class="fa-solid fa-peso-sign" style="font-size: 170px;" alt="Website Analytics" width="170" class="card-website-analytics-img" style="color:  #28a745;"></i>
     </div>
   </div>
 </div>
@@ -249,7 +249,7 @@ $activeBiddings = 0;
     <div class="card h-100">
       <div class="card-body text-center d-flex align-items-center justify-content-center">
         <div class="card-header">
-          <h6 class="mb-0">No Bidding Now</h6>
+          <h6 class="mb-0" style="color:  #28a745;">No Bidding Now</h6>
         </div>
       </div>
     </div>
@@ -309,31 +309,32 @@ $activeBiddings = 0;
   <div class="card h-100">
     <div class="card-header d-flex justify-content-between">
       <div class="card-title mb-0">
-        <div class="badge p-2 bg-label-warning mb-2 rounded"><i class="fas fa-clock-rotate-left"></i></div>
-        <h5 class="card-title mb-3 pt-2">Payment History</h5>
+        <h5 class="card-title mb-3 pt-2"><div class="badge p-2 bg-label-warning mb-2 rounded"><i class="fas fa-clock-rotate-left"></i></div>    Payment History</h5>
       </div>
     </div>
     <div class="card-body">
       <div class="payment-history" style="margin-top: 2px;">
-      <hr class="payment-line" style="margin-top: 5px; margin-bottom: 5px; border: none; border-top: 1px solid #ddd;">
-        @foreach($invoices as $invoice)
-          @if($invoice->payments->isNotEmpty())
-            @foreach($invoice->payments as $payment)
-              <div class="payment-item" style="margin-bottom: 10px; display: flex;">
-                <div class="payment-date" style="margin-right: 10px;">{{ $payment->created_at->format('F d, Y') }}</div>
-                <div class="payment-amount">₱ {{ $payment->amount }}</div>
-              </div>
-              <hr class="payment-line" style="margin-top: 5px; margin-bottom: 5px; border: none; border-top: 1px solid #ddd;">
-            @endforeach
-          @else
-            <div class="no-payment-history">No payment history available.</div>
-          @endif
-        @endforeach
+        @if($invoices->isEmpty())
+        <div class="no-payment-history" style="color:  #28a745;">No payment history available.</div>
+        @else
+          @foreach($invoices as $invoice)
+            @if($invoice->payments->isNotEmpty())
+              @foreach($invoice->payments as $payment)
+                <div class="payment-item" style="margin-bottom: 10px; display: flex; align-items: center;">
+                  <div class="payment-date" style="margin-right: 10px;">{{ $payment->created_at->format('F d, Y') }}</div>
+                  <div class="payment-amount">₱ {{ $payment->amount }}</div>
+                </div>
+                @if (!$loop->last)
+                  <hr class="payment-line" style="margin-top: 5px; margin-bottom: 5px; border: none; border-top: 1px solid #ddd;">
+                @endif
+              @endforeach
+            @endif
+          @endforeach
+        @endif
       </div>
     </div>
   </div>
 </div>
-
 
 
 

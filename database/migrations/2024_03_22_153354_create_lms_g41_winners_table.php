@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('winners', function (Blueprint $table) {
+        Schema::create('lms_g41_winners', function (Blueprint $table) {
             $table->id();
             $table->foreignId('bidding_product_id')->constrained('lms_g41_bidding_products');
             $table->foreignId('bid_id')->constrained('lms_g49_bids'); // Ensure this matches your bids table
@@ -19,6 +19,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('winners');
+        Schema::dropIfExists('lms_g41_winners');
     }
 };

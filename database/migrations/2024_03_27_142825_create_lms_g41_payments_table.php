@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-      Schema::create('payments', function (Blueprint $table) {
+      Schema::create('lms_g41_payments', function (Blueprint $table) {
         $table->id();
-        $table->foreignId('invoice_id')->constrained();
+        $table->foreignId('invoice_id')->constrained('lms_g41_invoices');
         $table->decimal('amount', 8, 2);
         $table->string('payment_method')->nullable(); // Optional
         $table->timestamps();
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('payments');
+        Schema::dropIfExists('lms_g41_payments');
     }
 };
