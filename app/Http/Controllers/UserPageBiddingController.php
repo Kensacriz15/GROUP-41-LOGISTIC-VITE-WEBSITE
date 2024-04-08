@@ -11,25 +11,25 @@ use App\Models\Winner;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
-class HomePage extends Controller
+class UserPageBiddingController extends Controller
+
 {
-  public function index()
+  public function index(Request $request)
   {
-      $requests = ProcurementRequest::where('status', 'approved')
-          ->latest()
-          ->get();
+      $search = $request->input('search');
 
-      $totalRequests = $requests->count();
+      $biddingsQuery = BiddingProduct::query();
 
-      $limitedRequests = $requests->take(3);
+      if ($search) {
+          $biddingsQuery->where('name', 'like', '%' . $search . '%');
+      }
 
+      $biddings = $biddingsQuery->latest()->limit(3)->get();
       $biddingProducts = BiddingProduct::with('bids')->get();
+      $totalBiddings = $biddings->count();
       $totalBids = $biddingProducts->sum(function ($biddingProduct) {
           return $biddingProduct->bids->count();
       });
-
-      $biddings = BiddingProduct::latest()->limit(3)->get();
-      $totalBiddings = $biddings->count();
 
       foreach ($biddings as $bidding) {
           if (!$bidding->start_date instanceof Carbon\Carbon) {
@@ -44,20 +44,8 @@ class HomePage extends Controller
           $bidding->countdown = $this->calculate_countdown($bidding->end_date);
       }
 
-      $winnersCount = Winner::count();
-
-      $purchaseInvoices = Invoice::count();
-      $budgetUse = Invoice::sum('amount_paid'); // Replace 'amount' with the actual column name for budget use
-      $numberOfInvoices = Invoice::count();
-      $currentBudget = 5000;
-
-      $invoice = Invoice::with('payments')->first(); // Fetch a single invoice with its payments
-
-      $biddingProducts = BiddingProduct::with('winners')->get();
-      return view('app.home', compact('limitedRequests', 'biddings', 'totalBiddings', 'biddingProducts', 'winnersCount', 'totalBids', 'invoice', 'purchaseInvoices', 'budgetUse', 'numberOfInvoices', 'currentBudget', 'totalRequests','biddingProducts' ));
+      return view('app.procurement.biddings.userpagebidding', compact('biddings', 'totalBiddings', 'biddingProducts', 'totalBids', 'search'));
   }
-
-
 private function calculate_progress($start_date, $end_date)
     {
         // Ensure $start_date and $end_date are Carbon instances
@@ -81,11 +69,4 @@ private function calculate_progress($start_date, $end_date)
           $timeRemaining = $end_date->diff($now)->format('%dd %hh %im %ss');
           return $timeRemaining;
       }
-
-  public function create()
-{
-    $biddings = BiddingProduct::all(); // Fetch the biddings data from the database
-
-    return view('app.procurement.biddings.create', compact('biddings'));
-}
 }

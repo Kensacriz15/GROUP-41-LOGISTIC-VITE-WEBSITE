@@ -7,10 +7,16 @@
       "slug": "app.home"
     },
     {
-      "url": "/procurement-indexbids",
+      "url": "/inventory",
       "name": "Inventory Management",
       "icon": "menu-icon tf-icons ti ti-package",
-      "slug": "app.procurement.indexbids"
+      "slug": "app.inventory.dashboard"
+    },
+    {
+      "url": "/quality-standards",
+      "name": "Quality Standard",
+      "icon": "menu-icon tf-icons ti ti-ruler",
+      "slug": "app.quality-standards.index"
     }
   ]
 }

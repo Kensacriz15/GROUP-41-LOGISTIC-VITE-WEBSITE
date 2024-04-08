@@ -68,8 +68,8 @@
           <dt class="col-sm-4">Description:</dt>
           <dd class="col-sm-8">{{ $bidding->description }}</dd>
 
-          <dt class="col-sm-4">Starting Price: ₱</dt>
-          <dd class="col-sm-8">{{ $bidding->starting_price }}</dd>
+          <dt class="col-sm-4">Starting Price: </dt>
+          <dd class="col-sm-8">₱ {{ $bidding->starting_price }}</dd>
 
           <dt class="col-sm-4">Start Date:</dt>
           <dd class="col-sm-8">{{ $bidding->start_date ? $bidding->start_date->format('M d, Y') : '' }}</dd>

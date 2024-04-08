@@ -10,10 +10,12 @@
               <div class="card">
                   <div class="card-header">Bids</div>
                   <div class="card-body">
-                  <button type="button" onclick="showLowestBids()" class="btn btn-sm btn-success mb-2" style="float: right;">Show Lowest</button>                    @if ($biddingProduct->bids->count() > 0)
+                  <button type="button" class="btn btn-sm btn-success mb-2" style="float: right;" id="showLowestButton">Show Lowest</button>
+                   @if ($biddingProduct->bids->count() > 0)
                           <table class="bids-table table table-striped table-bordered">
                               <thead>
                                   <tr>
+                                      <th>ID</th>
                                       <th>Amount</th>
                                       <th>Bidder Type</th>
                                       <th>Bidder Name</th>
@@ -22,6 +24,7 @@
                               <tbody>
                                   @foreach ($biddingProduct->bids as $bid)
                                       <tr>
+                                          <td>{{ $bid->id }}</td>
                                           <td>{{ $bid->amount }}</td>
                                           <td>{{ $bid->supplier ? 'Supplier' : 'Vendor' }}</td>
                                           <td>
@@ -56,22 +59,23 @@
                                   </tr>
                               </thead>
                               <tbody>
-                                  @foreach ($biddingProduct->winners as $winner)
-                                      <tr>
-                                          <td>{{ $biddingProduct->name }}</td>
-                                          <td>
-                                              @if ($winner->bid->supplier)
-                                                  {{ $winner->bid->supplier->supplier_name }} (Supplier)
-                                              @else
-                                                  {{ $winner->bid->vendor->vendor_name }} (Vendor)
-                                              @endif
-                                          </td>
-                                          <td>{{ $winner->bid->amount }}</td>
-                                          <td>
-                                          <button type="button" onclick="window.location.href='{{ route('createInvoice', ['winnerId' => $winner->id]) }}'" class="btn btn-sm btn-warning mb-2">Create Invoice</button>
-                                          </td>
-                                      </tr>
-                                  @endforeach
+                              @foreach ($biddingProduct->winners as $winner)
+    <tr>
+        <td>{{ $biddingProduct->name }}</td>
+        <td>
+            @if ($winner->bid && $winner->bid->supplier)
+                {{ $winner->bid->supplier->supplier_name }} (Supplier)
+            @elseif($winner->bid && $winner->bid->vendor)
+                {{ $winner->bid->vendor->vendor_name }} (Vendor)
+            @else
+                N/A
+            @endif
+        </td>
+        <td>{{ $winner->bid->amount }}</td>
+        <td>
+        <button type="button" onclick="createInvoiceWithPrompt()" class="btn btn-sm btn-warning mb-2">Create Invoice</button>
+    </tr>
+@endforeach
                               </tbody>
                           </table>
                       @endif
@@ -101,17 +105,35 @@
       </style>
 
       <script>
-          function showLowestBids() {
-              const bidRows = Array.from(document.querySelectorAll('.bids-table tbody tr'));
-              bidRows.sort((a, b) => {
-                  const amountA = parseFloat(a.querySelector('td').textContent);
-                  const amountB = parseFloat(b.querySelector('td').textContent);
-                  return amountA - amountB;
-              });
-              const tbody = document.querySelector('.bids-table tbody');
-              tbody.innerHTML = '';
-              bidRows.forEach(row => tbody.appendChild(row));
-          }
+       document.addEventListener('DOMContentLoaded', function() {
+    const showLowestButton = document.getElementById('showLowestButton');
+    let isAscending = true; // Variable to track the sorting order
+    showLowestButton.addEventListener('click', showLowestBids);
 
+    function showLowestBids() {
+        const bidRows = Array.from(document.querySelectorAll('.bids-table tbody tr'));
+        bidRows.sort((a, b) => {
+            const amountA = parseFloat(a.querySelector('td:nth-child(2)').textContent);
+            const amountB = parseFloat(b.querySelector('td:nth-child(2)').textContent);
+            if (isAscending) {
+                return amountA - amountB; // Sort in ascending order
+            } else {
+                return amountB - amountA; // Sort in descending order
+            }
+        });
+        const tbody = document.querySelector('.bids-table tbody');
+        tbody.innerHTML = '';
+        bidRows.forEach(row => tbody.appendChild(row));
+
+        isAscending = !isAscending; // Toggle the sorting order
+    }
+});
+
+          function createInvoiceWithPrompt() {
+        const winnerId = prompt('Please enter the winner ID from the list:');
+        if (winnerId) {
+            window.location.href = '{{ url('invoice/create') }}/' + winnerId;
+        }
+    }
       </script>
   @endsection

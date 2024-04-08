@@ -17,7 +17,10 @@ use App\Http\Controllers\BidController;
 use App\Http\Controllers\ApiController;
 use App\Models\BiddingProduct;
 use App\Models\Invoice;
-
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\QualityStandardController;
+use App\Http\Controllers\UserPageBiddingController;
+use App\Http\Controllers\SupplierBidController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -48,7 +51,7 @@ Route::resources([
 ]);
 
 Route::get('/procurement', [ApiController::class, 'Procurement']);
-// procurement
+// procurement and purchase
 Route::get('/procurement-requests', [ProcurementRequestsController::class, 'index'])->name('app.procurement.listrequest');
 Route::get('/procurement-requests/{request}', [ProcurementRequestsController::class, 'show'])->name('app.procurement.listrequestshow');
 Route::get('/generate-pdf/{id}', [ProcurementRequestsController::class, 'generatePDF'])->name('app.procurement.pdf');
@@ -82,6 +85,35 @@ Route::get('/bids/{bid}/invoice/edit', [BidController::class, 'editInvoice'])
 Route::put('/bids/{bid}/invoice/update', [BidController::class, 'updateInvoice'])
      ->name('app.procurement.invoices.update');
 Route::post('/app/procurement/invoices/{invoice}/payment', [BidController::class, 'processPayment'])->name('app.procurement.invoices.payment');
+
+Route::get('/BiddingsPage', [UserPageBiddingController::class, 'index'])->name('app.procurement.biddings.userpagebidding');
+
+Route::resource('supplierbidding', SupplierBidController::class)
+     ->except(['show', 'edit', 'update', 'destroy']); // Exclude actions not used initially
+
+// You might need to manually add the create route (adjust if needed):
+Route::get('/supplierbidding/create', [SupplierBidController::class, 'create'])->name('app.procurement.supplierbidding.create');
+Route::post('/supplierbidding/submit-bid', [SupplierBidController::class, 'store'])->name('app.procurement.supplierbidding.store');
+
+
+//inventory
+Route::view('/inventory', 'app.inventory.dashboard');
+Route::resource('products', ProductController::class);
+Route::get('/products', [ProductController::class, 'index'])->name('app.products.index');
+Route::get('/products/create', [ProductController::class, 'create'])->name('app.products.create');
+Route::post('/products', [ProductController::class, 'store'])->name('app.products.store');
+Route::get('/products/{product}', [ProductController::class, 'show'])->name('app.products.show');
+Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('app.products.edit');
+Route::put('/products/{product}', [ProductController::class, 'update'])->name('app.products.update');
+Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('app.products.destroy');
+
+
+
+//integration
+Route::get('/quality-standards', [QualityStandardController::class, 'index'])->name('app.quality-standards.index');
+
+
+
 
 Route::middleware([
     'auth:sanctum',

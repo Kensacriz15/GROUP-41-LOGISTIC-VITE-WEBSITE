@@ -256,6 +256,31 @@ $activeBiddings = 0;
   </div>
 @endif
 
+<div class="container">
+      <div class="card mb-3">
+        <div class="card-body">
+            <h4 class="card-title" style="text-align: center;">Top Bidders</h4>
+            <ul>
+                @foreach($biddingProducts as $biddingProduct)
+                    @foreach ($biddingProduct->winners as $winner)
+                        <li>
+                            @if ($winner->bid)
+                                @if($winner->bid->supplier)
+                                    {{ $winner->bid->supplier->supplier_name }} (Supplier)
+                                @elseif ($winner->bid->vendor)
+                                    {{ $winner->bid->vendor->vendor_name }} (Vendor)
+                                @endif
+                            @else
+                                N/A
+                            @endif
+                        </li>
+                    @endforeach
+                @endforeach
+            </ul>
+        </div>
+    </div>
+</div>
+
   <!--/ Sales Overview -->
 
   <div class="row">

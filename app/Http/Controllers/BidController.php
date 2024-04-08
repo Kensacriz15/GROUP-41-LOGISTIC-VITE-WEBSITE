@@ -57,30 +57,34 @@ class BidController extends Controller
 
     public function determineWinners()
     {
-        $this->where('end_date', '<=', now())->each(function ($product) {
-            if ($product->winners()->count() > 0) {
-                return; // Skip to the next product if winners already exist
-            }
+        $this->where('end_date', '<=', now())
+             ->whereDoesntHave('winners') // Ensure products with winners are skipped
+             ->each(function ($product) {
+                 // Find the winning bid(s) for the CURRENT bidding product
+                 $winningBidQuery = $product->bids()->orderBy('amount');
 
-            // Find the winning bid(s) for the CURRENT bidding product
-            $winningBidQuery = $product->bids()->orderBy('amount'); // Scoped to the product's bids
+                 // Handle potential ties
+                 $winningBids = $winningBidQuery->get();
 
-            // Handle potential ties (optional - adjust if needed)
-            $winningBids = $winningBidQuery->get(); // Get all bids with the lowest amount
+                 foreach ($winningBids as $winningBid) {
+                     try {
+                         // Check if a winner already exists for the bid
+                         if ($winningBid->winner) {
+                             continue; // Skip to the next bid if a winner already exists
+                         }
 
-            foreach ($winningBids as $winningBid) {
-                try {
-                    Winner::create([
-                        'bidding_product_id' => $product->id,
-                        'bid_id' => $winningBid->id,
-                    ]);
-                } catch (\Exception $e) {
-                    // Handle the exception appropriately:
-                    Log::error('Winner creation failed:', ['product_id' => $product->id, 'exception' => $e]);
-                }
-            }
-        });
+                         Winner::create([
+                             'bidding_product_id' => $product->id,
+                             'bid_id' => $winningBid->id,
+                         ]);
+                     } catch (\Exception $e) {
+                         // Handle the exception appropriately:
+                         Log::error('Winner creation failed:', ['product_id' => $product->id, 'exception' => $e]);
+                     }
+                 }
+             });
     }
+
 
 
     public function viewInvoice($invoiceId)
@@ -118,7 +122,7 @@ class BidController extends Controller
             'invoice' => $existingInvoice,
             'logoPath' => public_path('images/logo.png')
         ]);
-        return $pdf->stream('invoice.pdf');
+        return $pdf->stream('invoices.invoice-template');
     }
 
     // Create the invoice
